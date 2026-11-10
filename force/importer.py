@@ -74,6 +74,8 @@ def children_map(proc: Path = Path("/proc")) -> dict[int, list[int]]:
         except ValueError:
             continue
         cmap.setdefault(ppid, []).append(int(p.name))
+    for kids in cmap.values():
+        kids.sort()          # pid order, not the directory's (only /proc happens to list in order)
     return cmap
 
 
