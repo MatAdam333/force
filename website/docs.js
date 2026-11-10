@@ -12,6 +12,19 @@
     });
   });
 
+  // a code block that scrolls sideways fades at its right edge until scrolled to the end
+  var codes = Array.prototype.slice.call(document.querySelectorAll(".code"));
+  function edges() {
+    codes.forEach(function (c) {
+      var over = c.scrollWidth > c.clientWidth + 1;
+      c.classList.toggle("overflows", over);
+      c.classList.toggle("at-end", !over || c.scrollLeft + c.clientWidth >= c.scrollWidth - 2);
+    });
+  }
+  codes.forEach(function (c) { c.addEventListener("scroll", edges, { passive: true }); });
+  window.addEventListener("resize", edges);
+  edges();
+
   var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
   var sections = links.map(function (a) { return document.querySelector(a.getAttribute("href")); });
   function mark() {

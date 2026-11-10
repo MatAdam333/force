@@ -378,8 +378,9 @@ h2 { margin: 0; text-wrap: balance; font: 700 clamp(1.65rem, 2.7vw, 2.3rem)/1.12
   .shot-win .term.phone-only { font-size: calc(100cqw / 27.6943); }   /* 46 columns across the card (cqw is its content box); .term outranks the small-screen size below */
   /* the coral card is about the limits: only the list's last rows (host and plan usage) */
   .wall.card.bl { height: auto; }
-  .card.bl .shot-win { height: calc(100cqw / 27.6943 * 1.1640625 * 13 + 34px); }
-  .card.bl .shot-win .phone-only { position: absolute; left: 0; bottom: 0; }
+  .card.bl .shot-win { bottom: auto; height: calc(100cqw / 27.6943 * 1.1640625 * 14 + 34px); -webkit-mask-image: none; mask-image: none; }
+  .card.bl .shot-win .phone-only { position: absolute; left: 0; bottom: 0;   /* the list's last 14 of 27 rows (from mobile), below the title bar */
+    clip-path: inset(calc(var(--lh) * 13) 0 0 0); }
 }
 .phone-only { display: none; }
 @media (max-width: 640px) { .shot-win .phone-only { display: block; } }

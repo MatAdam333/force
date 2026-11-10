@@ -291,25 +291,32 @@
 
     <section id="reference">
       <h2>Command reference</h2>
-<pre class="code ref-block">force                                  open the cockpit   <span class="c">--remote NAME, --no-intro</span>
-force new [NAME] [--cwd DIR] [--kind claude|opencode|shell]
-force rename OLD NEW
-force move NAME up|down|DIR
-force restart [NAME|--all]            force upgrade [NAME|--all]
-force archive NAME                    force unarchive NAME
-force delete NAME [--yes]             force list [--all] [--json]
-force import [ID] [--name NAME] [--dry-run]
-force host add NAME [SSH] | list | remove NAME | upgrade NAME
-force prompt NAME TEXT… [--wait] [--until STATE] [--timeout SEC] [--json]
-force wait NAME [--until STATE] [--timeout SEC]
-force read NAME [--lines N]           force keys NAME KEY…
-force status STATE [--summary TEXT]   force explain NAME
-force settings [set KEY VALUE | unset KEY | path | edit] [--all] [--json]
-force notify-test [needs-you|finished|down]
-force update [--check]                force uninstall [--purge] [--yes]
-force doctor [--fix]                  force fonts
-force --version                       the installed version (for bug reports)
-force skill                            the guide for agents that drive Force</pre>
+<pre class="code ref-block"><span class="l">force  <span class="c"># open the cockpit (--remote NAME, --no-intro)</span></span>
+<span class="l">force new [NAME] <span class="w">[--cwd</span> DIR] <span class="w">[--kind</span> claude|opencode|shell]</span>
+<span class="l">force rename OLD NEW</span>
+<span class="l">force move NAME up|down|DIR</span>
+<span class="l">force restart <span class="w">[NAME|--all]</span></span>
+<span class="l">force upgrade <span class="w">[NAME|--all]</span></span>
+<span class="l">force archive NAME</span>
+<span class="l">force unarchive NAME</span>
+<span class="l">force delete NAME <span class="w">[--yes]</span></span>
+<span class="l">force list <span class="w">[--all]</span> <span class="w">[--json]</span></span>
+<span class="l">force import [ID] <span class="w">[--name</span> NAME] <span class="w">[--dry-run]</span></span>
+<span class="l">force host add NAME [SSH] | list | remove NAME | upgrade NAME</span>
+<span class="l">force prompt NAME TEXT… <span class="w">[--wait]</span> <span class="w">[--until</span> STATE] <span class="w">[--timeout</span> SEC] <span class="w">[--json]</span></span>
+<span class="l">force wait NAME <span class="w">[--until</span> STATE] <span class="w">[--timeout</span> SEC]</span>
+<span class="l">force read NAME <span class="w">[--lines</span> N]</span>
+<span class="l">force keys NAME KEY…</span>
+<span class="l">force status STATE <span class="w">[--summary</span> TEXT]</span>
+<span class="l">force explain NAME</span>
+<span class="l">force settings [set KEY VALUE | unset KEY | path | edit] <span class="w">[--all]</span> <span class="w">[--json]</span></span>
+<span class="l">force <span class="w">notify-test</span> <span class="w">[needs-you|finished|down]</span></span>
+<span class="l">force update <span class="w">[--check]</span></span>
+<span class="l">force uninstall <span class="w">[--purge]</span> <span class="w">[--yes]</span></span>
+<span class="l">force doctor <span class="w">[--fix]</span></span>
+<span class="l">force fonts</span>
+<span class="l">force <span class="w">--version</span>  <span class="c"># the installed version (for bug reports)</span></span>
+<span class="l">force skill  <span class="c"># the guide for agents that drive Force</span></span></pre>
     </section>
   </main>
 </div>
