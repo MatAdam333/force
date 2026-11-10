@@ -180,6 +180,25 @@ def _claude_bin(env, expand) -> Path:
     return Path(found) if found else default
 
 
+WSL_ICONS_HINT = ("On WSL, Windows Terminal draws Force with Windows fonts, so Force shows plain symbols. For its icons: "
+                  "install \"Symbols Nerd Font Mono\" in Windows, add it to your Windows Terminal profile's font, "
+                  "then run: force settings set icons on")
+
+
+def is_wsl(env: dict[str, str] | None = None, proc: Path = Path("/proc")) -> bool:
+    """Running under Windows Subsystem for Linux. The terminal is then a Windows program that draws with Windows'
+    fonts, so the Linux font set (fc-list) says nothing about which glyphs it can show."""
+    env = os.environ if env is None else env
+    if env.get("WSL_DISTRO_NAME") or env.get("WSL_INTEROP"):
+        return True
+    if (proc / "sys/fs/binfmt_misc/WSLInterop").exists():
+        return True
+    try:
+        return "microsoft" in (proc / "sys/kernel/osrelease").read_text().lower()
+    except OSError:
+        return False
+
+
 def get_paths(env: dict[str, str] | None = None) -> Paths:
     """Resolve all paths from env (default os.environ), applying SPEC §2 defaults. Does not create dirs."""
     if env is None:

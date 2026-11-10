@@ -943,6 +943,8 @@ def _client_glyphs(glyphs: str) -> str:
         return "auto"
     if any(os.environ.get(k) for k in ("SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY")):
         return "auto"
+    if config.is_wsl():
+        return "auto"           # the terminal is a Windows program: Linux's fonts are not what it draws with
     try:
         out = subprocess.run(["fc-list", ":", "family"], capture_output=True, text=True, timeout=3).stdout
     except (OSError, subprocess.TimeoutExpired):

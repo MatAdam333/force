@@ -19,7 +19,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from force.config import get_paths
+from force.config import WSL_ICONS_HINT, get_paths, is_wsl
 
 # The one-line prefix used by every message ("force", orange like share/fonts.sh's `say`).
 COLOR = "\033[1;38;2;217;119;87mforce\033[0m"
@@ -260,7 +260,10 @@ def setup_services(rel, home, run, no_services, self_test, user) -> None:
 
 
 # --- step 7: the icon font on a desktop ------------------------------------------------------
-def setup_fonts(rel, env, run) -> None:
+def setup_fonts(rel, env, run, wsl=None) -> None:
+    if (is_wsl(env) if wsl is None else wsl):
+        say(WSL_ICONS_HINT)                                           # a Linux font would not reach the terminal
+        return
     if not (env.get("DISPLAY") or env.get("WAYLAND_DISPLAY")):
         return                                                        # headless: nothing to do
     fc = shutil.which("fc-list", path=env.get("PATH", ""))

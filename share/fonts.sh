@@ -44,6 +44,15 @@ case "${1:-}" in
   *) usage >&2; exit 2 ;;
 esac
 
+# WSL: the terminal is a Windows program drawing with Windows' fonts; a font installed here never reaches it
+if [ "$UNINSTALL" = 0 ] && { [ -n "${WSL_DISTRO_NAME:-}${WSL_INTEROP:-}" ] || [ -e /proc/sys/fs/binfmt_misc/WSLInterop ] \
+     || grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null; }; then
+  say "On WSL, Windows Terminal draws Force with Windows fonts: install \"$SYMBOL_FAMILY\" in Windows (from"
+  say "https://github.com/ryanoasis/nerd-fonts/releases), add it to your Windows Terminal profile's font, then run:"
+  say "force settings set icons on"
+  exit 0
+fi
+
 # dconf/gsettings need the session bus. Use the well-known runtime socket when DBUS_SESSION_BUS_ADDRESS is unset;
 # without any bus, skip those steps (a silent no-op).
 DBUS=0

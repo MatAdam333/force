@@ -1449,3 +1449,16 @@ def test_uninstall_keeps_foreign_launcher(fakes, monkeypatch):
     monkeypatch.setattr(cli, "_stop_daemon", lambda c: None)
     assert cli.uninstall_command(cockpit, False, True) == 0
     assert launcher.exists(), "a launcher that is not Force's is left alone"
+
+
+def test_client_glyphs_ignores_linux_fonts_on_wsl(monkeypatch):
+    # on WSL fc-list lists Linux's fonts, but Windows Terminal draws with Windows' own: stay auto (tier.sh -> plain)
+    for k in ("SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY"):
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.setattr(cli.subprocess, "run",
+                        lambda *a, **k: subprocess.CompletedProcess(a, 0, "Symbols Nerd Font Mono\n", ""))
+    monkeypatch.setattr(cli.config, "is_wsl", lambda: False)
+    assert cli._client_glyphs("auto") == "rich"
+    monkeypatch.setattr(cli.config, "is_wsl", lambda: True)
+    assert cli._client_glyphs("auto") == "auto"
+    assert cli._client_glyphs("rich") == "rich"                           # `force settings set icons on` still wins

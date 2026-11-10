@@ -338,3 +338,16 @@ def test_claude_bin_falls_back_to_path(tmp_path):
     assert get_paths(dict(env, FORCE_CLAUDE_BIN="/x/claude")).claude_bin.as_posix() == "/x/claude"
     assert get_paths({"HOME": str(tmp_path / "nohome"), "PATH": str(tmp_path / "empty")}).claude_bin == \
         tmp_path / "nohome/.local/bin/claude", "nothing found: the installer location"
+
+
+def test_is_wsl(tmp_path):
+    from force.config import is_wsl
+    proc = tmp_path / "proc"
+    (proc / "sys/kernel").mkdir(parents=True)
+    (proc / "sys/kernel/osrelease").write_text("6.8.0-47-generic\n")
+    assert not is_wsl({}, proc)                                           # plain Linux
+    assert is_wsl({"WSL_DISTRO_NAME": "Ubuntu-24.04"}, proc)              # WSL's own variables
+    assert is_wsl({"WSL_INTEROP": "/run/WSL/1_interop"}, proc)
+    (proc / "sys/kernel/osrelease").write_text("5.15.167.4-microsoft-standard-WSL2\n")
+    assert is_wsl({}, proc)                                               # the kernel (e.g. under sudo, no env)
+    assert not is_wsl({}, tmp_path / "nowhere")                           # no /proc to read

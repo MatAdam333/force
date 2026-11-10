@@ -289,7 +289,7 @@ def test_linger_refused_note(tmp_path, capsys):
 # --- fonts -----------------------------------------------------------------------------------
 def test_fonts_skipped_without_display(tmp_path):
     fr = FakeRun()
-    S.setup_fonts(make_release(tmp_path), {"DISPLAY": ""}, fr)
+    S.setup_fonts(make_release(tmp_path), {"DISPLAY": ""}, fr, wsl=False)
     assert not any("fonts.sh" in c[0][-1] for c in fr.calls)
 
 
@@ -297,7 +297,7 @@ def test_fonts_run_when_display_and_missing_family(tmp_path):
     rel = make_release(tmp_path)
     fr = FakeRun()
     fr.handle(lambda a, k: R(0, "DejaVu Sans\nNoto\n") if a[0].endswith("fc-list") else None)
-    S.setup_fonts(rel, {"DISPLAY": ":0", "PATH": "/usr/bin:/bin"}, fr)
+    S.setup_fonts(rel, {"DISPLAY": ":0", "PATH": "/usr/bin:/bin"}, fr, wsl=False)
     assert any(c[0][-1].endswith("fonts.sh") for c in fr.calls)
 
 
@@ -305,8 +305,18 @@ def test_fonts_skipped_when_family_present(tmp_path):
     rel = make_release(tmp_path)
     fr = FakeRun()
     fr.handle(lambda a, k: R(0, "Symbols Nerd Font Mono:style=Regular\n") if a[0].endswith("fc-list") else None)
-    S.setup_fonts(rel, {"DISPLAY": ":0", "PATH": "/usr/bin:/bin"}, fr)
+    S.setup_fonts(rel, {"DISPLAY": ":0", "PATH": "/usr/bin:/bin"}, fr, wsl=False)
     assert not any(c[0][-1].endswith("fonts.sh") for c in fr.calls)
+
+
+def test_fonts_skipped_on_wsl_with_a_hint(tmp_path, capsys):
+    # WSLg gives a DISPLAY, but Windows Terminal draws with Windows fonts: a Linux font would never reach it
+    rel = make_release(tmp_path)
+    fr = FakeRun()
+    fr.handle(lambda a, k: R(0, "DejaVu Sans\n") if a[0].endswith("fc-list") else None)
+    S.setup_fonts(rel, {"DISPLAY": ":0", "PATH": "/usr/bin:/bin"}, fr, wsl=True)
+    assert not fr.calls
+    assert "Windows Terminal" in capsys.readouterr().out
 
 
 # --- claude Code hint ------------------------------------------------------------------------

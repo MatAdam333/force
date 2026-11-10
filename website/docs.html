@@ -64,6 +64,9 @@
         the system one is older than 3.11). It puts <code>force</code> in <code>~/.local/bin</code> and on your PATH
         for bash, zsh and fish, starts its two background services (systemd user units; without systemd,
         <code>force</code> starts them itself) and, on a desktop, installs the icon font.</p>
+      <p>On WSL, Windows Terminal draws Force with Windows' fonts, so Force shows plain symbols there. For its icons,
+        install <a href="https://github.com/ryanoasis/nerd-fonts/releases">Symbols Nerd Font Mono</a> in Windows,
+        add it to your Windows Terminal profile's font, then run <code>force settings set icons on</code>.</p>
       <p>Options go after <code>sh -s --</code>:</p>
 <pre class="code"><span class="p">$</span> curl -fsSL https://useforce.cc/install.sh | sh -s -- --no-fonts</pre>
       <table class="ref">
