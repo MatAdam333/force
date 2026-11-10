@@ -227,6 +227,16 @@ h1 { grid-row: 1 / 4; margin: 0; max-width: 12ch; text-wrap: balance; font: 700 
           box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); cursor: pointer; transition: background .15s; }
 .replay svg { width: 14px; height: 14px; }
 .replay:hover { background: rgba(60, 60, 60, .85); }
+/* in the live window it sits in the title bar's empty left end (34 px tall, scaled with the window), never over the
+   terminal */
+.stage .replay { top: calc(17px * var(--k, 1)); bottom: auto; left: 12px; right: auto; transform: translateY(-50%);
+                 padding: calc(5px * var(--k, 1)) 11px calc(5px * var(--k, 1)) 9px; gap: 6px; color: #c8c8c8;
+                 font-size: clamp(.68rem, calc(15px * var(--k, 1)), .78rem);
+                 background: rgba(255, 255, 255, .06); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1);
+                 backdrop-filter: none; -webkit-backdrop-filter: none; }
+.stage .replay svg { width: 12px; height: 12px; }
+.stage .replay:hover { color: #fff; background: rgba(255, 255, 255, .12); }
+.stage.live.narrow .replay { top: 17px; padding: 5px 11px 5px 9px; font-size: .78rem; }   /* the narrow window keeps its own size */
 .replay[hidden], .play[hidden] { display: none; }
 .play { position: absolute; z-index: 5; right: 16px; bottom: 16px; width: 40px; height: 40px; border-radius: 50%; border: 0;
         padding: 0; display: grid; place-items: center;
@@ -370,7 +380,8 @@ h2 { margin: 0; text-wrap: balance; font: 700 clamp(1.65rem, 2.7vw, 2.3rem)/1.12
   .phone-row:hover, .phone-row:focus-visible { background: rgba(255, 255, 255, .05); outline-offset: -2px; }
   /* the film's Replay button sits under the window, in the wallpaper's caption band, not over the screen */
   .stage, .stage.live.narrow { overflow: visible; }
-  .stage .replay { top: calc(100% + 10px); bottom: auto; right: 0; }
+  .stage .replay, .stage.live.narrow .replay { top: calc(100% + 10px); bottom: auto; left: auto; right: 0; transform: none;
+    padding: 9px 14px 9px 12px; font-size: .86rem; }
   /* the feature windows show the phone captures: the whole screen, its 46 columns across the card */
   .shot-win .desk-only { display: none; }
   .wall.card { height: auto; padding: 14px; container-type: inline-size; }
