@@ -75,9 +75,12 @@
   .ref tbody tr { display: grid; padding: 10px 0; border-top: 1px solid #262626; }
   .ref tbody th, .ref tbody td { border: 0; padding: 0; width: auto; white-space: normal; }
   .ref tbody td { margin-top: 2px; }
+  .ref tbody tr:last-child th, .ref tbody tr:last-child td { border-bottom: 0; }   /* the closing line goes under the row */
+  .ref tbody tr:last-child { border-bottom: 1px solid #262626; }
   .ref td:nth-child(2):not(:last-child) { white-space: normal; padding-right: 0; color: #7a7a7a; }
   .ref thead { display: none; }
   .states tbody th::before { top: 3px; bottom: 3px; }
+  .ref.states tbody th, .ref.states tbody td { padding-left: 16px; }   /* room for the bar (the reset above zeroes it) */
 }
 
 /* a single-column page (privacy): the docs column without the contents list */
