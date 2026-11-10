@@ -1,6 +1,6 @@
 # A tag vX.Y.Z (matching pyproject.toml's version) builds the release tarball in the builder container, attests
 # its provenance, publishes a GitHub Release with the tarball, its .sha256 and install.sh, then redeploys the
-# website so https://useforce.cc/install.sh installs the new version.
+# website (on main) so https://useforce.cc/install.sh installs the new version.
 name: Release
 
 on:
@@ -17,6 +17,7 @@ jobs:
       contents: write
       id-token: write
       attestations: write
+      actions: write
     steps:
       - uses: actions/checkout@v4
       - name: The tag matches pyproject.toml
@@ -48,13 +49,8 @@ jobs:
           gh release create "$GITHUB_REF_NAME" --title "Force $VERSION" --generate-notes --verify-tag \
             "$d"/releases/force-"$VERSION"-linux-*.tar.gz "$d"/releases/force-"$VERSION"-linux-*.tar.gz.sha256 \
             "$d/install.sh"
-
-  website:
-    needs: release
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    uses: ./.github/workflows/pages.yml
-    with:
-      tag: ${{ github.ref_name }}
+      - name: Put the new install.sh on the website
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # the website workflow runs on main: Pages publishes a deployment from main, not one from a tag
+        run: gh workflow run pages.yml --repo "$GITHUB_REPOSITORY" --ref main -f tag="$GITHUB_REF_NAME"

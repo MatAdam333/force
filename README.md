@@ -88,7 +88,7 @@ Everything else is in the menu (<kbd>Ctrl</kbd>+<kbd>Space</kbd> inside Force) a
 
 Bug reports and ideas are welcome: use the [issue forms](https://github.com/zalandemeter/force/issues/new/choose).
 To work on Force itself, see [CONTRIBUTING.md](CONTRIBUTING.md); the design is written down in
-[docs/SPEC.md](docs/SPEC.md). Security problems go to [SECURITY.md](.github/SECURITY.md), not to a public issue.
+[docs/SPEC.md](docs/SPEC.md). Found a security problem? Email hello@useforce.cc instead of opening an issue ([SECURITY.md](.github/SECURITY.md)).
 
 ## Licence
 

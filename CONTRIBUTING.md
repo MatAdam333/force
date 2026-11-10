@@ -1,8 +1,9 @@
 # Contributing to Force
 
 Thanks for wanting to help. Bug reports and ideas go through the
-[issue forms](https://github.com/zalandemeter/force/issues/new/choose); security problems through
-[SECURITY.md](.github/SECURITY.md). For code, open a pull request against `main`: CI runs the tests on it.
+[issue forms](https://github.com/zalandemeter/force/issues/new/choose). A security problem goes by email to
+hello@useforce.cc, never into a public issue or pull request ([SECURITY.md](.github/SECURITY.md)). For code, open a
+pull request against `main`: CI runs the tests on it.
 
 ## The repository
 

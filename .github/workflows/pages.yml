@@ -10,8 +10,7 @@ on:
       - share/skill.md
       - LICENSE
       - .github/workflows/pages.yml
-  workflow_dispatch:
-  workflow_call:
+  workflow_dispatch:                # by hand, and by the release workflow with its tag
     inputs:
       tag:
         description: "The release whose install.sh to publish (default: the latest release)"
