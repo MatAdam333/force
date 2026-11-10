@@ -12,6 +12,11 @@ on:
       - .github/workflows/pages.yml
   workflow_dispatch:
   workflow_call:
+    inputs:
+      tag:
+        description: "The release whose install.sh to publish (default: the latest release)"
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -35,8 +40,10 @@ jobs:
       - name: install.sh of the latest release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
         run: |
-          if gh release download --repo "$GITHUB_REPOSITORY" --pattern install.sh --dir _site; then
+          # a release run names its own tag: a release published seconds ago may not be "latest" yet
+          if gh release download ${TAG:+"$TAG"} --repo "$GITHUB_REPOSITORY" --pattern install.sh --dir _site; then
             grep -m1 '^VERSION=' _site/install.sh
           else
             echo "::warning::no release yet: the site goes up without install.sh"
