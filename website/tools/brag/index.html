@@ -1,0 +1,387 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: "Geist"; src: url("fonts/geist-latin.woff2") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "Force Mono"; src: url("fonts/dejavu-sans-mono.woff2") format("woff2"); font-weight: 400; }
+@font-face { font-family: "Force Mono"; src: url("fonts/dejavu-sans-mono-bold.woff2") format("woff2"); font-weight: 700; }
+/* Force's icons (the Nerd Font symbols `force fonts` installs), each in one cell like in the terminal */
+@font-face { font-family: "Force Symbols"; src: url("fonts/nerd-symbols.woff2") format("woff2"); }
+.nf { display: inline-block; width: .6021em; font-family: "Force Symbols"; white-space: pre; vertical-align: top;
+      position: relative; z-index: 1; }   /* drawn over the next cell, as a terminal lets a wide icon overflow */
+html, body { margin: 0; background: #000; }
+#stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #161616;
+         font-family: "Geist", sans-serif; color: #fff; }
+.layer { position: absolute; inset: 0; opacity: 0; }
+
+/* the floor: Force's own graphite. The film plays inside the page's window, which already sits on the coral
+   wallpaper, so the film itself is the dark screen of that window, lit softly from above */
+#floor, #keep .floor, #cockfloor { position: absolute; inset: 0;
+  background: radial-gradient(90% 70% at 50% 0%, #2c2c2c 0%, rgba(44,44,44,0) 70%), linear-gradient(180deg, #1f1f1f, #161616); }
+#pile { position: absolute; inset: 0; }
+
+/* scenes 1-2: the pile of terminals */
+.win { position: absolute; left: 0; top: 0; overflow: hidden; background: #212121; border: 1px solid rgba(255,255,255,.14);
+       border-radius: 12px; font: 400 17px/1.45 "Force Mono", monospace; color: #c8c8c8; }
+.win .bar { height: 34px; background: #2a2a2a; display: flex; align-items: center; justify-content: center; padding: 0 14px;
+            font: 600 15px/1 "Geist", sans-serif; color: #a8a8a8; white-space: nowrap; overflow: hidden; }
+.win .bar i { display: none; }
+.win .bar b { font-weight: 600; }
+.win pre { margin: 0; padding: 14px 18px; font: inherit; white-space: pre; }
+.win .need { position: absolute; left: 410px; top: 146px; background: #f0645e; color: #fff; border-radius: 8px;
+             font: 600 17px/1 "Geist", sans-serif; padding: 9px 13px; opacity: 0; white-space: nowrap; box-shadow: 0 8px 24px rgba(240,100,94,.45); }
+.g { color: #7dd87d; } .y { color: #e5c07b; } .c { color: #d97757; } .d { color: #8a8a8a; }
+
+/* captions: centred, quiet, word by word out of a blur; a coral hairline draws under them */
+.cap { position: absolute; left: 0; right: 0; top: 968px; text-align: center; white-space: nowrap;
+       font-weight: 600; font-size: 44px; line-height: 1; letter-spacing: -.025em;
+       color: #fff; text-shadow: 0 2px 30px rgba(0,0,0,.55); }
+.cap span { display: inline-block; opacity: 0; }
+/* the page shows the captions on its wallpaper under the window, so the film carries none */
+.cap { display: none; }
+.cap .hair { display: none; }
+.cap.big { top: 902px; font-size: 88px; font-weight: 560; font-stretch: 112%; letter-spacing: -.01em; }
+.cap.big .hair { top: 114px; width: 220px; margin-left: -110px; }
+.cap.dark { text-shadow: 0 4px 40px rgba(0,0,0,.8); }
+
+/* they keep working: the sessions, floating, the terminal gone */
+#keep { display: flex; justify-content: center; align-items: center; }
+.list { position: relative; width: 900px; margin-top: -90px; padding: 34px 40px 30px; border-radius: 18px; background: #212121;
+         box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 50px 120px -10px rgba(0,0,0,.65);
+         font: 400 30px/1.25 "Force Mono", monospace; color: #c6c6c6; }
+.list .rule { display: flex; align-items: center; gap: 22px; color: #9a9a9a; letter-spacing: .32em; margin: 0 0 30px; }
+.list .rule::before, .list .rule::after { content: ""; flex: 1; height: 1px; background: #3c3c3c; }
+.list .rule.low { letter-spacing: .02em; margin: 30px 0 0; color: #c6c6c6; }
+.list .rule .bolt { color: #d97757; letter-spacing: 0; margin-right: .3em; }
+.row { display: flex; align-items: center; height: 58px; padding: 0 18px 0 0; position: relative; }
+.row .edge { width: 6px; align-self: stretch; margin: 8px 26px 8px 0; background: #4e4e4e; }
+.row .ic { width: 1.2em; text-align: center; margin-right: .8em; }
+.row .nm { flex: 1; color: #e2e2e2; }
+.row .st { position: relative; text-align: right; min-width: 11em; height: 1.25em; }
+.row .st b { position: absolute; right: 0; top: 0; font-weight: 400; white-space: nowrap; }
+
+/* cockpit */
+/* the cockpit is the same window as the end, at the same place: the page's stage is Force's window, so these scenes
+   fill it exactly instead of floating a window inside it */
+.ring { position: absolute; border: 2px solid #f0645e; border-radius: 8px; opacity: 0;
+        box-shadow: 0 0 22px rgba(240,100,94,.5); }
+#cursor { position: absolute; left: 0; top: 0; width: 54px; height: 54px; opacity: 0; filter: drop-shadow(0 4px 6px rgba(0,0,0,.6)); }
+.ripple { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%;
+          border: 2px solid #f6c2a4; opacity: 0; }
+
+/* the end: Force's window exactly as the landing page draws it at 1200 px (chrome + the api screen), scaled 1.6x to
+   the frame's width and centred; the page crops the frame to the window and swaps in the live one, pixel for pixel */
+.fwin { position: absolute; left: 0; top: 0; width: 1200px; transform-origin: 0 0; font: 400 16px/1.6 "Geist", sans-serif; }
+.fwin .chrome { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 34px; padding: 0 14px;
+  background: #2a2a2a; border-radius: 11px 11px 0 0; color: #a8a8a8; font-size: 12.8px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.07), inset 0 1px 0 rgba(255,255,255,.06); }
+.fwin .chrome b { font-weight: 600; letter-spacing: .01em; }
+.fwin .chrome .ctl { justify-self: end; color: #7c7c7c; display: flex; }
+.fwin .chrome .ctl svg { width: 44px; height: 10px; }
+.fwin .tw { background: #212121; border-radius: 0 0 11px 11px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.07); }
+.fwin .scr { width: max-content; font-size: 13.2647px; }
+.fwin pre { margin: 0; font-family: "Force Mono", monospace; font-size: 1em; line-height: 1.1640625; color: #d0d0d0;
+           width: max-content; font-variant-ligatures: none; }
+/* as on the page: screen.py lays the screen out on its cell grid; backgrounds, block characters and box drawing are
+   boxes in one layer under the text (see style.css), the text plain on top */
+.fwin pre { --lh: 1.1640625em; --cw: .60205078em; position: relative; isolation: isolate; }
+.fwin pre .paint { position: absolute; left: 0; top: 0; z-index: -1; pointer-events: none; }
+.fwin pre .paint i { position: absolute; display: block; background: var(--bg);
+  top: calc(var(--r) * var(--lh) + var(--ty, 0) * var(--t, 0px) - var(--et, 0px));
+  left: calc(var(--c) * var(--cw) + var(--tx, 0) * var(--t, 0px) - var(--el, 0px));
+  width: calc(var(--n) * var(--cw) + var(--tw, 0) * var(--t, 0px) + var(--el, 0px) + var(--er, 1px));
+  height: calc(var(--h) * var(--lh) + var(--th, 0) * var(--t, 0px) + var(--et, 0px) + var(--eb, 1px)); }
+.fwin pre .paint i.arc { background: none; box-sizing: border-box; }
+.fwin pre .bk { -webkit-text-fill-color: transparent; }
+#endfloor { position: absolute; inset: 0; background: #161616; }
+/* the last caption sits over the window, so it gets a quiet dark plate of its own */
+/* captions over Force's window get a quiet dark plate of their own, low on the window over its status line */
+.cap.plate { left: 50%; right: auto; top: 978px; transform: translateX(-50%); padding: 16px 30px 18px; border-radius: 14px;
+             font-size: 40px; background: rgba(20,20,20,.9); box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 20px 50px rgba(0,0,0,.55); }
+#cap6 { opacity: 0; }
+#cap6 .hair { top: 78px; }
+
+/* finish: grain and vignette over everything */
+#vignette { position: absolute; inset: 0; pointer-events: none;
+            background: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 60%, rgba(0,0,0,.42)); }
+#grain { position: absolute; left: -50px; top: -50px; pointer-events: none; opacity: .07; mix-blend-mode: overlay; }
+#black { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; }
+</style></head>
+<body><div id="stage">
+
+  <div id="pileL" class="layer"><div id="floor"></div><div id="pile"></div></div>
+  <div id="cock" class="layer"><div id="cockfloor"></div>
+    <div class="fwin" id="cockA"><div class="chrome"><span></span><b>force</b><span class="ctl"><svg viewBox="0 0 44 10"><path d="M1 5.5h8M18 1.5h7v7h-7zM35 1.5l7 7m0-7-7 7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></span></div><div class="tw"><div class="scr"><pre id="preA"></pre></div></div></div>
+    <div class="fwin" id="cockB" style="opacity:0"><div class="chrome"><span></span><b>force</b><span class="ctl"><svg viewBox="0 0 44 10"><path d="M1 5.5h8M18 1.5h7v7h-7zM35 1.5l7 7m0-7-7 7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></span></div><div class="tw"><div class="scr"><pre id="preB"></pre></div></div></div>
+    <div class="ring" id="ring"></div>
+    <div class="ripple" id="ripple"></div>
+  </div>
+  <div id="keep" class="layer"><div class="floor"></div><div class="list" id="list"></div></div>
+  <div id="end" class="layer"><div id="endfloor"></div>
+    <div id="fin" class="fwin"><div class="chrome"><span></span><b>force</b><span class="ctl"><svg viewBox="0 0 44 10"><path d="M1 5.5h8M18 1.5h7v7h-7zM35 1.5l7 7m0-7-7 7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></span></div>
+      <div class="tw"><div class="scr"><pre id="preF"></pre></div></div></div></div>
+
+  <div class="cap" id="cap1">Seven agents. Seven terminals.</div>
+  <div class="cap" id="cap2">Which one needs you?</div>
+  <div class="cap plate" id="cap3">Force: every agent in one terminal.</div>
+  <div class="cap plate" id="cap4">It tells you who needs you.</div>
+  <div class="cap" id="cap5">Close the terminal. They keep working.</div>
+  <div class="cap plate" id="cap6">Open Force again. Nothing stopped.</div>
+
+  <svg id="cursor" viewBox="0 0 24 24"><path d="M3 2l7 19 2.6-7.6L20 11z" fill="#fff" stroke="#000" stroke-width="1.2"/></svg>
+  <canvas id="grain" width="1020" height="590"></canvas>
+  <div id="vignette"></div>
+  <div id="black"></div>
+</div>
+<script>
+// each window is the session of the same name in the sidebar; card i = sidebar rows 3+2i .. 4+2i
+const W = [
+  ["shell", 150, 120, -2, ['<span class="d">~$</span> htop', '<span class="d">~$</span> df -h /', 'Filesystem  Size  Used Avail', '/dev/nvme0  908G  640G  268G']],
+  ["api", 860, 90, 2, ['<span class="g">●</span> Update(server.py)', '  └ Added 2 lines', '<span class="d">  Ran 1 shell command</span>', '<span class="g">●</span> /health returns {"ok": true}']],
+  ["billing-fix", 470, 300, -1, ['<span class="g">●</span> Read 2 files', '<span class="y">✻</span> Thinking about VAT rounding…', '', '<span class="c">Do you want to overwrite</span>', '<span class="c">test_invoice.py?</span>']],
+  ["docs-site", 1180, 330, 3, ['<span class="g">●</span> Built 48 pages in 3.1 s', '<span class="g">●</span> Fixed 2 broken links', '', '<span class="g">✓</span> done · your turn']],
+  ["infra", 200, 520, 1, ['<span class="g">●</span> terraform plan', '  3 to add, 0 to change', '<span class="d">  Ran 2 shell commands</span>']],
+  ["mobile", 760, 600, -3, ['<span class="y">✻</span> Running the iOS tests…', '<span class="d">  ⎿ 214 passed</span>', '<span class="y">✻</span> Bumping the build number']],
+  ["migration-2024", 1260, 640, 2, ['<span class="d">(30 hours ago)</span>', '<span class="g">●</span> Migrated 12 of 12 tables', '<span class="d">  waiting since yesterday</span>']],
+];
+// the colour each card has in the sidebar, so a window lands in it
+const CARD_BG = ["#212121", "#2c2c2c", "#212121", "#212121", "#212121", "#212121", "#212121"];
+const pile = document.getElementById("pile");
+const wins = W.map(([name, x, y, rot, lines]) => {
+  const d = document.createElement("div");
+  d.className = "win";
+  d.innerHTML = `<div class="bar"><i></i><i></i><i></i><b>${name}</b></div><pre>${lines.join("\n")}</pre>` +
+                (name === "billing-fix" ? '<div class="need">! needs you</div>' : "");
+  pile.appendChild(d);
+  return d;
+});
+const order = [0, 2, 1, 4, 5, 3, 6];        // stacking: billing-fix lies buried
+order.forEach((wi, z) => wins[wi].style.zIndex = z + 1);
+
+document.querySelectorAll(".cap").forEach(c => {
+  c.innerHTML = c.textContent.split(" ").map(w => `<span>${w}</span>`).join(" ") + '<i class="hair"></i>';
+});
+
+// the screens arrive drawn by screen.py (the work folder's copies are its output), as on the page
+async function load(id, url) { document.getElementById(id).innerHTML = await (await fetch(url)).text(); }
+
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lin = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+const ease = p => 1 - Math.pow(1 - p, 3);
+const easeQ = p => 1 - Math.pow(1 - p, 5);
+const inout = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const mix = (a, b, k) => a + (b - a) * k;
+const hexv = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+const mixc = (a, b, k) => { const x = hexv(a), y = hexv(b); return `rgb(${x.map((v, i) => Math.round(mix(v, y[i], k))).join(",")})`; };
+
+// a caption: its words come out of a blur one by one from `a`, the hairline draws under them; all of it
+// dissolves upwards ending at `b`
+function cap(id, t, a, b) {
+  const el = document.getElementById(id);
+  const words = el.querySelectorAll("span");
+  const out = ease(lin(t, b - .45, b));
+  words.forEach((w, i) => {
+    const p = easeQ(lin(t, a + i * .1, a + i * .1 + .8));
+    w.style.opacity = p * (1 - out);
+    w.style.transform = `translateY(${(1 - p) * 10 - out * 8}px)`;
+    const bl = (1 - p) * 10 + out * 6;
+    w.style.filter = bl > .05 ? `blur(${bl}px)` : "none";
+  });
+  const h = el.querySelector(".hair");
+  h.style.transform = `scaleX(${inout(lin(t, a + .2, a + 1.1))})`;
+  h.style.opacity = 1 - out;
+}
+const show = (id, o) => document.getElementById(id).style.opacity = o;
+
+const KW = 1.6, FS = 13.2647, CW = FS * .6021 * KW, CH = FS * 1.1640625 * KW;
+let ORGX = 0, ORGY = 0, PILL = null;   // the screen's top-left cell in the frame, set by measure()
+const SPIN = [...Array(8)].map((_, i) => String.fromCodePoint(0xF0A9E + i));   // the pie Force fills while working
+let spinEls = null;
+
+// film grain: one fixed random field, shifted per frame (deterministic)
+const gctx = document.getElementById("grain").getContext("2d");
+const gimg = gctx.createImageData(1020, 590);
+let seed = 7;
+const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+for (let i = 0; i < gimg.data.length; i += 4) { const v = rnd() * 255; gimg.data[i] = gimg.data[i+1] = gimg.data[i+2] = v; gimg.data[i+3] = 255; }
+gctx.putImageData(gimg, 0, 0);
+const grainEl = document.getElementById("grain");
+grainEl.style.width = "2040px"; grainEl.style.height = "1180px";
+
+// they keep working: the sessions with the terminal closed; some change state while we watch
+const STATE = {
+  shell: ["\uEA85", "#c6c6c6", "shell ~"], idle: ["\uF10C", "#c6c6c6", "idle"], stale: ["\uF017", "#8a8a8a", "stale"],
+  turn: ["\uF058", "#87c08f", "your turn"], work: [null, "#d7af5f", ""], need: ["\uF0F3", "#f0645e", "needs permission"],
+};
+const KEEP = [
+  { name: "shell", from: "shell" },
+  { name: "api", from: "idle" },
+  { name: "billing-fix", from: "work", to: "need", at: 14.55, a: "updating the tests" },
+  { name: "docs-site", from: "work", to: "turn", at: 13.75, a: "building the docs" },
+  { name: "infra", from: "idle" },
+  { name: "mobile", from: "work", a: "running a command" },
+  { name: "migration-2024", from: "stale" },
+];
+const icon = (st, t) => st === "work" ? SPIN[Math.floor(t * 8) % 8] : STATE[st][0];
+const list = document.getElementById("list");
+list.innerHTML = '<div class="rule"><span><span class="bolt nf">\uF0E7</span> FORCE</span></div>';
+const rowEls = KEEP.map(k => {
+  const el = document.createElement("div"); el.className = "row";
+  const words = st => st === "work" ? null : STATE[st][2];
+  const ta = k.a || words(k.from), tb = k.b || (k.to ? words(k.to) : "");
+  el.innerHTML = `<i class="edge"></i><span class="ic nf"></span><span class="nm">${k.name}</span>` +
+    `<span class="st"><b class="a" style="color:${STATE[k.from][1]}">${ta}</b><b class="b" style="color:${STATE[k.to || k.from][1]}">${tb}</b></span>`;
+  list.appendChild(el);
+  return { el, edge: el.querySelector(".edge"), ic: el.querySelector(".ic"), a: el.querySelector(".a"), b: el.querySelector(".b") };
+});
+list.insertAdjacentHTML("beforeend", '<div class="rule low"><span><span class="nf" style="color:#d97757">\uEB3A</span>&nbsp; devbox · terminal closed</span></div>');
+
+function render(t) {
+  const fr = Math.floor(t * 30);
+  grainEl.style.transform = `translate(${-(fr * 37 % 50)}px, ${-(fr * 53 % 50)}px)`;
+
+  // --- scenes 1-3: the pile; then each window morphs into its own card in the sidebar --------------------
+  show("pileL", t < 5.9 ? 1 : 0);
+  // the camera drifts in slowly over the pile and settles back to 1:1 for the morph, so the cards land exactly
+  const S = t < 4.6 ? 1 + .03 * ease(lin(t, 0, 4.6)) : 1 + .03 * (1 - inout(lin(t, 4.6, 5.0)));
+  const pileEl = document.getElementById("pile");
+  pileEl.style.transform = `scale(${S})`;
+  pileEl.style.transformOrigin = "50% 45%";
+  document.getElementById("floor").style.opacity = 1;
+  wins.forEach((w, i) => {
+    const z = order.indexOf(i);
+    const p = easeQ(lin(t, .15 + z * .27, .15 + z * .27 + .5));        // drop in
+    const m = inout(lin(t, 5.0 + i * .06, 5.0 + i * .06 + .8));         // morph into card i
+    const jit = t > 2.7 && t < 5 ? Math.sin(t * 11 + i * 2.1) * 1.4 : 0;
+    const cx = ORGX + CW, cy = ORGY + (3 + 2 * i) * CH, cw = 27 * CW, ch = 2 * CH;   // the card rows under the brand rule
+    const x0 = +W[i][1] + jit, y0 = +W[i][2] - 46 * (1 - p);
+    w.style.left = `${mix(x0, cx, m)}px`;
+    w.style.top = `${mix(y0, cy, m)}px`;
+    w.style.width = `${mix(640, cw, m)}px`;
+    w.style.height = `${mix(330, ch, m)}px`;
+    w.style.transform = `rotate(${W[i][3] * (1 - m)}deg) scale(${.96 + .04 * p})`;
+    w.style.transformOrigin = "0 0";
+    w.style.opacity = p * (1 - lin(t, 5.05, 5.4));
+    w.style.background = mixc("#1b1b1b", CARD_BG[i], m);
+    w.style.borderColor = `rgba(58,58,58,${1 - m})`;
+    w.style.boxShadow = `0 ${30 * (1 - m)}px ${70 * (1 - m)}px rgba(0,0,0,${.5 * (1 - m)})`;
+    const bar = w.querySelector(".bar");
+    bar.style.height = `${34 * (1 - lin(m, 0, .6))}px`;
+    bar.style.opacity = 1 - lin(m, 0, .5);
+    w.querySelector("pre").style.opacity = 1 - lin(m, 0, .45);
+    const need = w.querySelector(".need");
+    if (need) need.style.opacity = m > 0 ? 0 : (t > 3.0 && t < 5.0 ? (Math.sin((t - 3.0) * Math.PI * 2.4) > -0.2 ? 1 : 0.15) : 0);
+  });
+  cap("cap1", t, .5, 2.6);
+  cap("cap2", t, 2.8, 4.95);
+
+  // --- the cockpit: its cards appear where the windows landed, then it opens out from the sidebar -------
+  const cardsIn = inout(lin(t, 5.05, 5.55));
+  show("cock", cardsIn * (t < 12.7 ? 1 : 0));
+  const cout = inout(lin(t, 11.95, 12.6));
+  const swapA = 1 - lin(t, 9.42, 9.55), swapB = lin(t, 9.55, 9.75);
+  // the whole window appears at once as the windows land in the sidebar
+  ["cockA", "cockB"].forEach(id => {
+    const el = document.getElementById(id);
+    // the window closes: it sinks back a little and dissolves
+    const k2 = KW * (1 - .05 * cout);
+    el.style.transform = `translate(${960 - 600 * k2}px, ${540 - FIN_H / 2 * k2}px) scale(${k2})`;
+    el.style.filter = cout > .005 ? `blur(${cout * 14}px)` : "none";
+    el.style.opacity = (id === "cockA" ? swapA : swapB) * (1 - cout);
+  });
+  if (!spinEls) spinEls = [...document.querySelectorAll("#preA .nf, #preB .nf, #preF .nf")].filter(s => SPIN.includes(s.textContent));
+  spinEls.forEach(s => s.textContent = SPIN[Math.floor(t * 8) % 8]);
+  // the pill: the ring pulses, the cursor glides over in an arc and clicks (a soft ripple)
+  const ring = document.getElementById("ring");
+  ring.style.opacity = t > 8.35 && t < 9.5 ? (0.65 + 0.35 * Math.sin((t - 8.35) * 9)) * lin(t, 8.35, 8.5) : 0;
+  const pad = 6 + 3 * Math.sin((t - 8.35) * 9);
+  Object.assign(ring.style, { left: `${PILL.x - pad}px`, top: `${PILL.y - pad + 2}px`, width: `${PILL.w + 2 * pad}px`, height: `${PILL.h + 2 * pad}px` });
+  const cur = document.getElementById("cursor");
+  const gl = inout(lin(t, 8.5, 9.2));
+  const tx = PILL.x + PILL.w * .5, ty = PILL.y + PILL.h * .55;
+  const cx = mix(1180, tx, gl), cy = mix(660, ty, gl) - Math.sin(gl * Math.PI) * 60;
+  cur.style.opacity = lin(t, 8.4, 8.6) * (1 - lin(t, 10.6, 10.9));
+  cur.style.transform = `translate(${cx}px, ${cy}px) scale(${t > 9.25 && t < 9.4 ? 0.86 : 1})`;
+  const rp = lin(t, 9.27, 9.75), rip = document.getElementById("ripple");
+  rip.style.left = `${tx}px`; rip.style.top = `${ty}px`;
+  rip.style.opacity = rp > 0 && rp < 1 ? (1 - rp) * .9 : 0;
+  rip.style.transform = `scale(${1 + rp * 5})`;
+  cap("cap3", t, 6.45, 8.2);
+  cap("cap4", t, 8.4, 11.8);
+  document.getElementById("cap3").style.opacity = ease(lin(t, 6.3, 6.6)) * (1 - ease(lin(t, 7.8, 8.2)));
+  document.getElementById("cap4").style.opacity = ease(lin(t, 8.25, 8.55)) * (1 - ease(lin(t, 11.4, 11.8)));
+  // --- they keep working: the terminal is gone, the sessions carry on --------------------------------
+  const kin = ease(lin(t, 12.45, 13.1));
+  show("keep", kin);
+  document.querySelector("#keep .floor").style.opacity = 1;
+  const leave = inout(lin(t, 15.7, 16.3));
+  const L = document.getElementById("list");
+  L.style.transform = `translateY(${(1 - kin) * 18}px) scale(${(1 + .02 * lin(t, 12.45, 15.7)) * (1 + .12 * leave)})`;
+  L.style.opacity = 1 - leave;
+  L.style.filter = leave > .005 ? `blur(${leave * 10}px)` : "none";
+  const back = t => inout(lin(t, 15.7, 16.45));   // the rules around the list go as the window comes back
+
+  KEEP.forEach((k, i) => {
+    const row = rowEls[i];
+    const r = ease(lin(t, 12.6 + i * .07, 13.2 + i * .07));
+    // the state switches at k.at: the old line blurs out, the new one in
+    const sw = k.at ? inout(lin(t, k.at, k.at + .45)) : 0;
+    const [c0, c1] = [STATE[k.from][1], STATE[k.to || k.from][1]];
+    row.edge.style.background = mixc(c0 === "#c6c6c6" ? "#4e4e4e" : c0, c1 === "#c6c6c6" ? "#4e4e4e" : c1, sw);
+    row.ic.textContent = sw < .5 ? icon(k.from, t) : icon(k.to, t);
+    row.ic.style.color = mixc(c0, c1, sw);
+    const so = lin(sw, 0, .5), si = lin(sw, .5, 1);
+    row.a.style.opacity = 1 - so; row.a.style.transform = `translateY(${-14 * so}px)`;
+    row.b.style.opacity = si; row.b.style.transform = `translateY(${14 * (1 - si)}px)`;
+    // the terminal opens again: each row flies into its own card in the sidebar and becomes it
+    row.el.style.transform = `translateX(${(1 - r) * -14}px)`;
+    row.el.style.opacity = r;
+  });
+  cap("cap5", t, 13.0, 15.6);
+
+  // --- the end: Force's window again, settling exactly where the page's live window takes over -----------
+  const open = inout(lin(t, 15.8, 16.6));
+  show("end", lin(t, 15.8, 16.25));
+  const fin = document.getElementById("fin");
+  const k = 1.6 * (.955 + .045 * open);
+  fin.style.transform = `translate(${960 - 600 * k}px, ${540 - FIN_H / 2 * k}px) scale(${k})`;
+  fin.style.filter = open < .999 ? `blur(${(1 - open) * 8}px)` : "none";
+  fin.style.opacity = lin(t, 15.8, 16.3);
+  document.getElementById("endfloor").style.opacity = lin(t, 16.1, 16.5);
+  cap("cap6", t, 16.75, 18.75);
+  document.getElementById("cap6").style.opacity = ease(lin(t, 16.6, 16.95)) * (1 - ease(lin(t, 18.35, 18.75)));
+  // grain and vignette leave with the film, so its last frame is the page's own window
+  grainEl.style.opacity = 0;
+  document.getElementById("vignette").style.opacity = 0;
+}
+
+// where each row of the list lands: card i of the end window (sidebar rows 3+2i .. 4+2i, from cell 1)
+let FIN_H = 0, ROWGO = [];
+function measure() {
+  const fin = document.getElementById("fin");
+  FIN_H = fin.offsetHeight;
+  ORGX = 960 - 600 * KW; ORGY = 540 - FIN_H / 2 * KW + 34 * KW;
+  PILL = { x: ORGX + 118 * CW, y: ORGY + CH, w: 6 * CW, h: CH };   // " <bell>  1 ": the needs-you count in the header rule
+  const fs = 13.2647, cw = fs * .6021, lh = fs * 1.1640625, K = 1.6;
+  const top = 540 - FIN_H / 2 * K;
+  const stage = document.getElementById("stage").getBoundingClientRect();
+  ROWGO = rowEls.map((row, i) => {
+    row.el.style.transform = "none";
+    const rc = row.el.getBoundingClientRect();
+    const tx = cw * K, ty = top + (34 + (3 + 2 * i) * lh) * K, th = 2 * lh * K;
+    const s = th / rc.height;
+    return { dx: tx - (rc.left - stage.left), dy: ty + th / 2 - (rc.top - stage.top + rc.height / 2), s };
+  });
+}
+
+window.ready = (async () => {
+  await load("preA", "cockpit-api.html");
+  await load("preB", "cockpit-billing-fix.html");
+  await load("preF", "cockpit-api.html");
+  await document.fonts.ready;
+  measure();
+  render(0);
+  return true;
+})();
+window.render = render;
+</script>
+</body></html>

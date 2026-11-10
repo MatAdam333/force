@@ -1,0 +1,17 @@
+[Unit]
+Description=Force daemon (restores, watches and upgrades the sessions)
+Documentation=file://%h/.local/share/force/app/SPEC.md
+Wants=force-tmux.service
+After=force-tmux.service
+
+[Service]
+Type=simple
+Environment=PATH=%h/.local/share/force/app/share/tmux-bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/.local/bin/force daemon
+# Stop/restart only the daemon process; the agent sessions live in force-tmux.service.
+KillMode=process
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target

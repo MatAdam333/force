@@ -1,0 +1,483 @@
+/* Force landing page. The palette is Force's own terminal theme: a dark page in its greys, the coral of the Force
+   mark, and the sidebar's state colours. Colour comes in as wallpapers, the fields Force's real windows sit on: warm
+   coral for Force itself, and each feature in the colour of the state it is about. Text in Geist, the terminal and
+   code in DejaVu Sans Mono (it has every symbol Force draws, so the grid holds). */
+
+@font-face { font-family: "Geist"; src: url("fonts/geist-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Force Mono"; src: url("fonts/dejavu-sans-mono.woff2") format("woff2"); font-weight: 400; }
+@font-face { font-family: "Force Mono"; src: url("fonts/dejavu-sans-mono-bold.woff2") format("woff2"); font-weight: 700; }
+@font-face { font-family: "Unbounded"; src: url("fonts/unbounded.woff2") format("woff2"); font-weight: 200 900; font-display: swap; }
+@font-face { font-family: "Force Symbols"; src: url("fonts/nerd-symbols.woff2") format("woff2"); }
+
+:root {
+  --page: #141414;
+  --panel: #1d1d1d;
+  --term: #212121;          /* Force's own background */
+  --raised: #2c2c2c;        /* Force's selected card */
+  --line: rgba(255, 255, 255, .075);
+  --line-strong: #3c3c3c;
+  --text: #f2f2f2;
+  --soft: #c6c6c6;
+  --muted: #949494;
+  --coral: #d97757;         /* the Force mark */
+  --gutter: clamp(16px, 4.5vw, 48px);
+  --width: min(1200px, 100% - 2 * var(--gutter));
+  --sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --display: "Unbounded", "Geist", ui-sans-serif, system-ui, sans-serif;   /* the two big lines: the pitch and the close */
+  --mono: "Force Mono", "DejaVu Sans Mono", ui-monospace, monospace;
+  --cw: .60205078em;        /* one terminal cell: DejaVu Sans Mono's advance, 1233/2048 */
+  --lh: 1.1640625em;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 92px; scrollbar-color: #3a3a3a var(--page); }
+body { margin: 0; min-height: 100vh; background: var(--page); color: var(--text);
+       font: 400 1rem/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+::selection { background: rgba(217, 119, 87, .35); color: #fff; }
+a { color: var(--text); text-decoration-color: rgba(242, 242, 242, .3); text-underline-offset: .22em; }
+a:hover { text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; border-radius: 4px; }
+code { font-family: var(--mono); font-size: .875em; color: var(--text); }
+kbd { font: .8em/1 var(--mono); color: var(--soft); padding: 3px 6px 2px; border-radius: 5px; background: var(--raised);
+      box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .4), inset 0 0 0 1px rgba(255, 255, 255, .06); }
+
+main { overflow-x: clip; }
+p, dd { text-wrap: pretty; }
+main > section, .foot { width: var(--width); margin-inline: auto; }
+
+/* --- top bar: on the coral wallpaper at the top of the page (clear, white words, a white Install). As soon as the
+   page scrolls (.floating, set by site.js) it jumps out: it rises to the top edge and hangs from it as a solid black
+   tab, as wide as the content and rounded below only, with grey links and a coral Install; one short animation,
+   whatever the scroll distance ------------------------------------------------------------------------------------ */
+.top { position: absolute; left: 0; right: 0; top: 12px; z-index: 40; pointer-events: none; transition: top .35s var(--ease);
+       --bar-w: min(var(--width) - 16px, calc(var(--width) - 2 * clamp(18px, 5.4vw, 76px) + 40px)); --bar-l: 20px; }
+.top-in { pointer-events: auto; position: relative; isolation: isolate; margin-inline: auto; display: flex; align-items: center;
+          justify-content: space-between; width: var(--bar-w); height: 60px; padding: 0 8px 0 var(--bar-l); border-radius: 16px;
+          transition: width .4s var(--ease), height .35s var(--ease), padding .35s var(--ease), border-radius .35s var(--ease); }
+.top-in::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; opacity: 0; transition: opacity .3s ease;
+  background: #161616; box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .09), 0 1px 0 rgba(0, 0, 0, .5), 0 18px 36px -16px rgba(0, 0, 0, .7); }
+.mark { display: inline-flex; align-items: center; gap: 8px; font: 700 1.05rem/1 var(--display); letter-spacing: -.02em;
+        color: #fff; text-decoration: none; text-shadow: 0 1px 12px rgba(60, 15, 5, .3); transition: text-shadow .3s; }
+.mark svg { width: 19px; height: 19px; fill: #fff; transition: fill .3s; }
+.top nav { display: flex; align-items: center; gap: clamp(16px, 2.6vw, 30px); font-size: .92rem; }
+.top nav a { color: rgba(255, 240, 232, .88); text-decoration: none; text-shadow: 0 1px 12px rgba(60, 15, 5, .3); transition: color .3s, text-shadow .3s; }
+.top nav a:hover { color: #fff; }
+.top nav .nav-gh { display: inline-flex; align-items: center; }
+.top nav .nav-gh svg { width: 19px; height: 19px; fill: currentColor; }
+.top nav .nav-install { color: #161616; background-color: #f4f4f4; background-image: linear-gradient(180deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, 0));
+                        padding: 9px 16px; border-radius: 10px; font-weight: 500; text-shadow: none; transition: background-color .3s;
+                        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 2px 8px rgba(30, 10, 5, .3); }
+.top nav .nav-install:hover { color: #161616; filter: brightness(1.05); }
+/* at the top of the page the bar scrolls with it (a phone's pull-to-refresh moves both together); floating, it is
+   pinned to the window */
+.floating .top { position: fixed; top: 0; }
+.floating .top-in { width: var(--width); height: 72px; padding: 12px 8px 0 calc(var(--bar-l) + 4px); border-radius: 0 0 16px 16px; }
+.floating .top-in::before { opacity: 1; }
+.floating .mark { text-shadow: none; }
+.floating .mark svg { fill: var(--coral); }
+.floating .top nav a:not(.nav-install) { color: var(--muted); text-shadow: none; }
+.floating .top nav a:not(.nav-install):hover { color: var(--text); }
+.floating .top nav .nav-install { background-color: #e3825f; }
+@media (prefers-reduced-motion: reduce) { .top, .top-in { transition: none; } }
+
+
+
+/* --- hero: one warm wallpaper holding the pitch and, under it, Force's window ------------------------------------- */
+.hero { padding-top: 12px; }
+/* the headline on the left; on the right the description and the install line, a column as wide as the full line
+   (the description and the note take the column's width, they don't set it) */
+.hero-in { display: grid; grid-template-columns: minmax(0, 1fr) max-content; grid-template-rows: auto auto 1fr;
+           column-gap: 40px; align-items: end; margin-bottom: clamp(28px, 3vw, 40px); }
+.hero-in .sub, .hero-in .after { contain: inline-size; }
+h1 { grid-row: 1 / 4; margin: 0; max-width: 12ch; text-wrap: balance; font: 700 clamp(1.9rem, 3.3vw, 2.95rem)/1.08 var(--display);
+     letter-spacing: -.03em; color: #fff; text-shadow: 0 2px 30px rgba(60, 15, 5, .35); }
+.sub { grid-column: 2; margin: 0 0 22px; font-size: 1.04rem; line-height: 1.55; color: rgba(255, 240, 232, .86); }
+
+/* the install field: one quiet line of mono, the light button that copies it */
+.install { display: flex; align-items: center; gap: 16px; padding: 6px 6px 6px 20px; border-radius: 14px; max-width: 100%; text-align: left;
+           background: linear-gradient(180deg, #232323, #1c1c1c);
+           box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 0 0 1px rgba(255, 255, 255, .09), 0 10px 30px -12px rgba(0, 0, 0, .8); }
+.hero .install { grid-column: 2; background: rgba(20, 12, 10, .55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+                 box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 0 0 1px rgba(255, 255, 255, .14), 0 10px 30px -12px rgba(0, 0, 0, .6); }
+.hero .install code { font-size: .8rem; }
+.install code { min-width: 0; overflow-x: auto; white-space: nowrap; font-size: .875rem; color: #d0d0d0; scrollbar-width: none; padding: 9px 0; }
+.install code::-webkit-scrollbar { display: none; }
+.install .prompt { color: var(--coral); margin-right: .45ch; }
+.install .nb { white-space: nowrap; }
+.copy { flex: none; font: 500 .9rem/1 var(--sans); color: #141414; border: 0; border-radius: 9px; padding: 11px 18px; cursor: pointer;
+        min-width: 88px; text-align: center; background: linear-gradient(180deg, #ffffff, #e4e4e4);   /* fits "Copied" too: the line never reflows */
+        box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(0, 0, 0, .35), 0 2px 6px rgba(0, 0, 0, .35); transition: filter .15s; }
+.copy:hover { filter: brightness(1.04); }
+.copy:active { transform: translateY(1px); }
+.after { grid-column: 2; margin: 16px 0 0; color: rgba(255, 235, 225, .7); font-size: .88rem; }
+.after code { color: #fff; }
+
+/* wallpapers: the colour fields Force's windows sit on. Warm coral for Force itself; each feature row takes the
+   colour of the state it is about (the sidebar's red, amber and green), so the colour always means something. A fine
+   grain and a soft sheen over each one make it read as a lit surface, not a flat gradient */
+.wall { position: relative; isolation: isolate; overflow: hidden; border-radius: 28px; background-color: #2a0f0b;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07), inset 0 1px 0 rgba(255, 255, 255, .12); }
+.wall::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(115deg, transparent 25%, rgba(255, 255, 255, .07) 42%, transparent 58%); }
+.wall::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: inherit; opacity: .22; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1.4 -.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.wall-hero { padding: calc(60px + clamp(16px, 2.2vw, 30px)) clamp(18px, 5.4vw, 76px) clamp(52px, 5.4vw, 76px);   /* the top bar sits in its top margin */
+  background-image: radial-gradient(70% 65% at 16% 0%, #f7b08f 0%, rgba(247, 176, 143, 0) 62%),
+                    radial-gradient(60% 75% at 92% 4%, #c4512f 0%, rgba(196, 81, 47, 0) 64%),
+                    radial-gradient(90% 70% at 70% 100%, #5b1a10 0%, rgba(91, 26, 16, 0) 70%),
+                    linear-gradient(180deg, #8a3420 0%, #3a130c 55%, #1d0b08 100%); }
+/* the whole window is in view when the page opens: on a short screen it narrows (centred) until its height fits under
+   the words above it, but never below a readable size */
+.wall-hero .stage { margin: 0 auto; max-width: max(860px, calc((100vh - 350px) * 1.8416)); }
+@media (max-height: 820px) and (min-width: 1181px) {      /* short laptop screens: tighter spacing buys the room */
+  .wall-hero { padding-top: calc(60px + 10px); }
+  .hero-in { margin-bottom: 20px; }
+  .wall-hero .stage { max-width: max(860px, calc((100vh - 316px) * 1.8416)); }
+}
+/* the film's captions, in the wallpaper's bottom margin under the window */
+.film-cap { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; height: clamp(52px, 5.4vw, 76px); margin: 0; display: flex;
+            align-items: center; justify-content: center; padding: 0 16px; text-align: center;
+            font: 600 clamp(.95rem, 1.5vw, 1.3rem)/1.2 var(--sans); letter-spacing: -.015em; color: #fff;
+            text-shadow: 0 1px 16px rgba(40, 10, 4, .6); opacity: 0; transform: translateY(6px); filter: blur(4px);
+            transition: opacity .35s var(--ease), transform .45s var(--ease), filter .35s var(--ease); pointer-events: none; }
+.film-cap.on { opacity: 1; transform: none; filter: none; }
+@media (prefers-reduced-motion: reduce) { .film-cap { transition: opacity .2s; transform: none; filter: none; } }
+/* a window on a wallpaper: a hairline ring, a highlight on its top edge, and a shadow built in layers like a real one */
+.wall-hero .stage, .shot-win, .help-win {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .16), 0 1px 1px rgba(0, 0, 0, .25), 0 4px 8px rgba(0, 0, 0, .18),
+              0 16px 32px -4px rgba(0, 0, 0, .3), 0 40px 90px -16px rgba(0, 0, 0, .65); }
+.stage-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 32px; margin-top: 18px; }
+.hint { margin: 0; color: var(--soft); font-size: .92rem; }
+.note { margin: 0; color: var(--muted); font-size: .85rem; }
+.g-need { color: #f0645e; } .g-work { color: #d7af5f; } .g-turn { color: #87c08f; }   /* the sidebar's own state colours */
+.g-idle { color: #a3a3a3; } .g-stale { color: #707070; }
+
+/* the window: a real Force screen as text, in a plain Linux title bar */
+.window { margin: 0; position: relative; }
+.chrome { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 34px; padding: 0 14px;
+          background: #2a2a2a; border-radius: 11px 11px 0 0; color: #a8a8a8; font-size: .8rem;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); }
+.chrome b { font-weight: 600; letter-spacing: .01em; }
+.chrome .ctl { justify-self: end; color: #7c7c7c; display: flex; }
+.chrome .ctl svg { width: 44px; height: 10px; }
+.term-wrap { overflow-x: auto; scrollbar-width: none; background: var(--term); border-radius: 0 0 11px 11px;
+             box-shadow: 0 0 0 1px rgba(255, 255, 255, .07), 0 60px 120px -30px rgba(0, 0, 0, .85); }
+.term-wrap::-webkit-scrollbar { display: none; }   /* narrow screens swipe it; no bar under the window */
+.window .chrome { box-shadow: 0 0 0 1px rgba(255, 255, 255, .07), inset 0 1px 0 rgba(255, 255, 255, .06); }
+.screen { position: relative; width: max-content;
+          font-size: clamp(9.5px, calc((min(1200px, 100vw - 2 * var(--gutter)) - 2px) / 150 / .6021), 13.3px); }
+.term { margin: 0; padding: 0; font-family: var(--mono); line-height: 1.1640625; color: #d0d0d0;
+               width: max-content; font-variant-ligatures: none; }
+.term { font-size: 1em; }
+/* drawn like a terminal: every background and block character first, the text over it. screen.py lays each screen
+   out on its cell grid and turns them into boxes in one layer under the text (.paint); a box reaches a pixel into the
+   next cell and line (--et --er --eb --el), which the next box covers, so no seam opens at any zoom, and the
+   text stays plain inline text, never cut off (underscores hang below their line) and never nudged off the grid.
+   Box drawing (lines, rounded corners) is drawn the same way, on the cells' centre lines, as terminals do, so a
+   border is one straight line. Those characters stay in the text, invisible, for copying. */
+.term { position: relative; isolation: isolate; }
+.term .paint { position: absolute; left: 0; top: 0; z-index: -1; pointer-events: none; }
+.term .paint i { position: absolute; display: block; background: var(--bg);
+  top: calc(var(--r) * var(--lh) + var(--ty, 0) * var(--t, 0px) - var(--et, 0px));
+  left: calc(var(--c) * var(--cw) + var(--tx, 0) * var(--t, 0px) - var(--el, 0px));
+  width: calc(var(--n) * var(--cw) + var(--tw, 0) * var(--t, 0px) + var(--el, 0px) + var(--er, 1px));
+  height: calc(var(--h) * var(--lh) + var(--th, 0) * var(--t, 0px) + var(--et, 0px) + var(--eb, 1px)); }
+.term .paint i.arc { background: none; box-sizing: border-box; }   /* a rounded corner: its own geometry inline */
+.term .bk { -webkit-text-fill-color: transparent; }
+.term[hidden] { display: none; }
+/* Force's icons (the Nerd Font symbols `force fonts` installs), each in one cell like in the terminal */
+.term .nf { display: inline-block; width: var(--cw); font-family: "Force Symbols"; white-space: pre;
+                       vertical-align: top; position: relative; z-index: 1; }
+
+/* the gentle call on the session that needs you, until it is opened; Force's menu laid over the screen */
+.call { position: absolute; z-index: 2; pointer-events: none; border-radius: 4px; top: calc(7 * var(--lh)); left: var(--cw); width: calc(28 * var(--cw)); height: calc(2 * var(--lh));
+        animation: call 2.4s var(--ease) 1.6s infinite; }
+.screen.pointing { cursor: pointer; }
+.term.menu { position: absolute; top: 0; left: 0; z-index: 3; }
+.term.menu[hidden] { display: none; }
+.call.done { display: none; }
+@keyframes call {
+  0%   { box-shadow: 0 0 0 0 rgba(240, 100, 94, .0); }
+  25%  { box-shadow: 0 0 0 1px rgba(240, 100, 94, .75), 0 0 18px rgba(240, 100, 94, .25); }
+  70%, 100% { box-shadow: 0 0 0 1px rgba(240, 100, 94, 0), 0 0 18px rgba(240, 100, 94, 0); }
+}
+
+
+/* the stage: the film plays over Force's window and ends on it, pixel for pixel (the film's last frame is this window
+   at 1200 px, scaled to the stage), then fades and leaves the window to click around in. The window keeps its 1200 px
+   layout scaled to the stage (--k, set by site.js); where that would make the text too small (.narrow) it takes its
+   own readable size once the film is over, and swipes sideways. */
+.stage { position: relative; margin: clamp(48px, 6vw, 72px) 0 0; aspect-ratio: 1200 / 651.6;
+         border-radius: calc(11px * var(--k, 1)); overflow: hidden; background: var(--term);
+         box-shadow: 0 0 0 1px var(--line), 0 50px 140px rgba(0, 0, 0, .7); }
+.stage .window { position: absolute; left: 0; top: 0; width: 1200px; transform: scale(var(--k, 1)); transform-origin: 0 0; }
+.stage .screen { font-size: 13.2647px; }
+.stage video { position: absolute; inset: 0; z-index: 4; display: block; width: 100%; height: 100%; object-fit: cover;
+               transition: opacity .6s var(--ease); }
+.stage.live video { opacity: 0; pointer-events: none; }
+.stage.live.narrow { aspect-ratio: auto; border-radius: 11px; }
+.stage.live.narrow .window { position: static; width: auto; transform: none; }
+.stage.live.narrow .screen { font-size: 9.5px; }
+.stage-foot .hint { transition: opacity .4s; }
+.replay { position: absolute; right: 14px; bottom: 14px; z-index: 5; display: flex; align-items: center; gap: 8px;
+          font: 500 .86rem/1 var(--sans); color: #eee; padding: 9px 14px 9px 12px; border: 0; border-radius: 999px;
+          background: rgba(22, 22, 22, .72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); cursor: pointer; transition: background .15s; }
+.replay svg { width: 14px; height: 14px; }
+.replay:hover { background: rgba(60, 60, 60, .85); }
+.replay[hidden], .play[hidden] { display: none; }
+.play { position: absolute; z-index: 5; right: 16px; bottom: 16px; width: 40px; height: 40px; border-radius: 50%; border: 0;
+        padding: 0; display: grid; place-items: center;
+        background: rgba(22, 22, 22, .55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14); cursor: pointer; opacity: .7; transition: opacity .2s; }
+.stage:hover .play, .play:focus-visible { opacity: 1; }
+.play span { display: block; width: 12px; height: 12px;
+             border-left: 4px solid #eee; border-right: 4px solid #eee; }          /* pause */
+.play.paused span { width: 0; height: 0; border: 0; transform: translateX(2px);   /* optical centre */
+                    border-left: 12px solid #eee; border-top: 7px solid transparent; border-bottom: 7px solid transparent; }
+
+
+
+
+/* --- feature rows: words on one side, a real Force screen on its state's wallpaper on the other ------------------- */
+main > section + section { padding-top: clamp(120px, 13vw, 176px); }
+.rows { display: grid; gap: clamp(112px, 12vw, 168px); }
+.row { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(36px, 6vw, 96px); align-items: center; }
+.row.flip { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
+.row.flip .txt { order: 2; }
+h2 { margin: 0; text-wrap: balance; font: 700 clamp(1.65rem, 2.7vw, 2.3rem)/1.12 var(--display); letter-spacing: -.03em; color: var(--text); }
+.row h2 { margin: 0 0 18px; max-width: 14ch; }
+.txt > p { margin: 0; max-width: 40ch; font-size: 1.08rem; line-height: 1.6; color: #a6a6a6; }
+.txt code { color: var(--soft); }
+.go { margin: 18px 0 0; font-size: .95rem; }
+.go a { color: var(--soft); }
+
+.card { margin: 0; height: clamp(320px, 36vw, 500px); border-radius: 26px; }
+/* Force's real screen as text (crisp at any zoom), larger than life, running off the card's edge */
+.shot-win { position: absolute; z-index: 1; left: clamp(28px, 4vw, 56px); top: clamp(28px, 4vw, 56px); border-radius: 12px; overflow: hidden;
+            background: var(--term); }
+.shot-win .term { font-size: clamp(10px, 1.06vw, 15px); }
+.shot-win .chrome { border-radius: 0; box-shadow: none; grid-template-columns: auto 1fr; padding-left: 18px; }
+.shot-win .chrome span:first-child { display: none; }
+.shot-win .chrome .ctl { display: none; }
+.card.bl .shot-win { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 22%); mask-image: linear-gradient(180deg, transparent 0, #000 22%); }
+.card.bl .shot-win { top: auto; bottom: clamp(28px, 4vw, 56px); }
+.wall-red    { background-image: radial-gradient(70% 70% at 6% 0%, #ff9d8c 0%, rgba(255, 157, 140, 0) 62%),
+                                 radial-gradient(70% 80% at 100% 100%, #2a0706, rgba(42, 7, 6, 0) 70%), linear-gradient(160deg, #a8352b, #4a0e0b 60%, #260605); }
+.wall-amber  { background-image: radial-gradient(70% 70% at 6% 0%, #f7dc9a 0%, rgba(247, 220, 154, 0) 62%),
+                                 radial-gradient(70% 80% at 100% 100%, #221707, rgba(34, 23, 7, 0) 70%), linear-gradient(160deg, #a77a2a, #4a3410 60%, #241907); }
+.wall-green  { background-image: radial-gradient(70% 70% at 6% 0%, #b7ecbd 0%, rgba(183, 236, 189, 0) 62%),
+                                 radial-gradient(70% 80% at 100% 100%, #08200f, rgba(8, 32, 15, 0) 70%), linear-gradient(160deg, #3f8a52, #11381c 60%, #0a2112); }
+.wall-coral  { background-image: radial-gradient(70% 70% at 6% 100%, #f7b08f 0%, rgba(247, 176, 143, 0) 62%),
+                                 radial-gradient(70% 80% at 100% 0%, #2a0d08, rgba(42, 13, 8, 0) 70%), linear-gradient(200deg, #9b3d24, #4a170d 60%, #240b07); }
+
+/* the smaller facts */
+.more dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 clamp(28px, 4vw, 56px); margin: 0; }
+.more dl > div { padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, .09); }
+.more dt { margin-bottom: 8px; font-weight: 600; font-size: 1.08rem; letter-spacing: -.015em; color: var(--text); }
+.more dd { margin: 0; color: #9a9a9a; max-width: 40ch; line-height: 1.6; }
+.more code { color: var(--soft); }
+
+/* commands: Force's own help, as a window on graphite */
+.sec-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px 40px; margin-bottom: clamp(28px, 3.4vw, 44px); }
+.sec-head p { margin: 0; color: var(--muted); }
+.wall-graphite { padding: clamp(18px, 5vw, 64px);
+  background-image: radial-gradient(90% 90% at 15% 0%, #4a4a4a 0%, transparent 60%), radial-gradient(120% 120% at 100% 100%, #262626, #161616); }
+.help-win { border-radius: 12px; overflow: hidden; background: var(--term); }
+.help-win table { border-collapse: collapse; width: 100%; font: .86rem/1.5 var(--mono); }
+.help-win th, .help-win td { text-align: left; vertical-align: baseline; padding: 11px 0; border-top: 1px solid #2c2c2c; }
+.help-win tr:first-child th, .help-win tr:first-child td { border-top: 0; padding-top: 18px; }
+.help-win tr:last-child th, .help-win tr:last-child td { padding-bottom: 18px; }
+.help-win th { font-weight: 400; white-space: nowrap; padding-left: 24px; padding-right: 36px; width: 1%; }
+.help-win th code { color: #f2f2f2; font-size: 1em; }
+.help-win td { color: #8a8a8a; padding-right: 24px; }
+.help-win td code { color: #c6c6c6; font-size: 1em; }
+.help-win tbody tr:hover { background: #2c2c2c; }
+
+/* the close: the chair, on the top's wallpaper, lit from above */
+.wall-close { display: flex; flex-direction: column; align-items: center; text-align: center; padding: clamp(64px, 8vw, 104px) clamp(20px, 4vw, 48px);
+  background-image: radial-gradient(60% 80% at 50% 0%, rgba(247, 176, 143, .9) 0%, rgba(247, 176, 143, 0) 62%),
+                    radial-gradient(50% 70% at 100% 10%, #c4512f 0%, rgba(196, 81, 47, 0) 64%),
+                    radial-gradient(50% 70% at 0% 10%, #a8432a 0%, rgba(168, 67, 42, 0) 64%),
+                    linear-gradient(180deg, #7a2e1c 0%, #3a130c 60%, #1d0b08 100%); }
+.wall-close h2 { font: 700 clamp(2rem, 4.6vw, 3.6rem)/1.08 var(--display); letter-spacing: -.03em; color: #fff; }
+.wall-close p { margin: 16px 0 28px; max-width: 44ch; color: rgba(255, 240, 232, .8); font-size: 1.08rem; }
+.wall-close .install { background: rgba(20, 12, 10, .55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+                       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 0 0 1px rgba(255, 255, 255, .14), 0 10px 30px -12px rgba(0, 0, 0, .6); }
+.wall-close .close-more { margin: 18px 0 0; font-size: .92rem; color: rgba(255, 235, 225, .75); }
+.wall-close .close-more a, .wall-close .close-more code { color: #fff; }
+
+.foot { margin-top: clamp(80px, 10vw, 120px); padding: 36px 0 0; border-top: 1px solid var(--line); color: var(--muted);
+        font-size: .85rem; overflow: hidden; }
+.foot-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 20px 48px; }
+.foot-legal { margin: 0; max-width: 62ch; font-size: .8rem; line-height: 1.6; color: #828282; text-align: justify; hyphens: auto; }
+.foot-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 26px; font-size: .92rem; }
+.foot-nav a { display: inline-flex; align-items: center; gap: 8px; color: var(--soft); text-decoration: none; transition: color .15s; }
+.foot-nav a:hover, .foot-nav a[aria-current] { color: var(--text); }
+.foot-legal a { color: inherit; text-decoration: underline; text-decoration-color: #4a4a4a; text-underline-offset: 2px; }
+.foot-legal a:hover { color: var(--soft); }
+.foot-nav .gh svg { width: 16px; height: 16px; fill: currentColor; }
+@media (max-width: 640px) {   /* phones: the links first, two even columns; the licence text unjustified (a narrow column opens gaps) */
+  .foot-top { flex-direction: column; align-items: center; gap: 26px; }
+  .foot-nav { order: -1; display: grid; grid-template-columns: 1fr 1fr; justify-items: center; gap: 4px 16px; width: 100%; }
+  .foot-nav a:last-child { grid-column: 1 / -1; }   /* the address, alone on its row, centred under the pairs */
+  .foot-nav a { padding: 6px 0; }
+  .foot-nav .gh { order: 1; }   /* pairs: the two forms, then GitHub and Privacy, then the address */
+  .foot-nav a:nth-child(n+4) { order: 2; }
+  .foot-legal { text-align: center; hyphens: manual; text-wrap: balance; }
+}
+/* the sign-off: the name, huge and faint, its letters (not its box) exactly as wide as the column, cut by the bottom
+   of the page. Unbounded 700 at -.065em tracking: the ink is 3.2258em wide and starts .0625em after the pen. */
+.foot { container-type: inline-size; }
+.foot-word { margin: clamp(28px, 4vw, 48px) 0 0 -.0625em; height: .62em; overflow: hidden; white-space: nowrap; user-select: none;
+             font: 700 calc(100cqw / 3.2258)/.78 var(--display); letter-spacing: -.065em; color: transparent;
+             background: linear-gradient(180deg, #2b2b2b 0%, #1c1c1c 60%, #151515 100%); -webkit-background-clip: text; background-clip: text; }
+
+/* one entrance: the hero's words */
+.rise { animation: rise .8s var(--ease) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+
+/* below the width where the full install line and a three-line headline fit side by side: one column */
+@media (max-width: 1180px) {
+  .hero-in { display: flex; flex-direction: column; align-items: flex-start; }
+  .hero-in h1 { max-width: 14ch; font-size: clamp(1.9rem, 5.2vw, 3.2rem); }
+  .hero-in .sub, .hero-in .after { contain: none; max-width: 56ch; }
+  .hero-in .sub { margin-top: 20px; }
+}
+/* phones: the stage holds Force at phone width instead of the desktop window: the real session list first (a tap
+   opens a session, "Sessions" goes back), every screen captured from Force in a 46 x 28 terminal, so nothing has to
+   scroll sideways. The 46 columns fill the stage's width (container query), so the text is as large as it can be. */
+.phone { display: none; }
+@media (max-width: 640px) {
+  .stage, .stage.live.narrow { aspect-ratio: 1080 / 1378;   /* the bar, 27 rows and a margin under the last one (the phone film's shape) */ container-type: inline-size; border-radius: 12px; }
+  .stage .window { display: none; }
+  .phone { display: block; position: absolute; inset: 0; overflow: hidden; border-radius: 12px; background: var(--term);
+           font-size: calc(100cqw / 27.6943); }
+  .phone-bar { display: flex; align-items: center; justify-content: space-between; gap: .6em; height: 3.1em; padding: 0 .7em;
+               background: #2a2a2a; box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .06); font: 600 1.05em/1 var(--sans); color: #e8e8e8; }
+  .phone-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .phone-back + .phone-title { text-align: center; }
+  .phone-back, .phone-pill { flex: none; font: 500 .92em/1 var(--sans); padding: .55em .8em; border: 0; border-radius: .6em; cursor: pointer;
+                             background: #3a3a3a; color: #f2f2f2; }
+  .phone-pill.need { background: rgba(240, 100, 94, .18); color: #f0645e; }
+  .stage .phone-screen, .stage.live.narrow .phone-screen { position: relative; width: auto; font-size: 1em; }
+  .phone-screen .term[data-view="list"] ~ .term { min-height: calc(27 * var(--lh)); }
+  .phone-row { position: absolute; left: 0; right: 0; height: calc(2 * var(--lh)); border: 0; padding: 0; background: none;
+               font-size: inherit;   /* --lh is in em: a button's own font size would stretch every row */
+               cursor: pointer; }
+  .phone-row:hover, .phone-row:focus-visible { background: rgba(255, 255, 255, .05); outline-offset: -2px; }
+  /* the film's Replay button sits under the window, in the wallpaper's caption band, not over the screen */
+  .stage, .stage.live.narrow { overflow: visible; }
+  .stage .replay { top: calc(100% + 10px); bottom: auto; right: 0; }
+  /* the feature windows show the phone captures: the whole screen, its 46 columns across the card */
+  .shot-win .desk-only { display: none; }
+  .wall.card { height: auto; padding: 14px; container-type: inline-size; }
+  .card .shot-win, .card.zoom .shot-win { position: relative; left: auto; top: auto; bottom: auto; transform: none; }
+  .shot-win .phone-only { font-size: calc((100cqw - 28px) / 27.6943); }
+  /* the coral card is about the limits: only the list's last rows (host and plan usage) */
+  .wall.card.bl { height: auto; }
+  .card.bl .shot-win { height: calc((100cqw - 28px) / 27.6943 * 1.1640625 * 13 + 34px); }
+  .card.bl .shot-win .phone-only { position: absolute; left: 0; bottom: 0; }
+}
+.phone-only { display: none; }
+@media (max-width: 640px) { .shot-win .phone-only { display: block; } }
+@media (max-width: 960px) {
+  .row, .row.flip { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .row.flip .txt { order: 0; }
+  .card { height: clamp(280px, 64vw, 460px); }
+  .more dl { grid-template-columns: minmax(0, 1fr); }
+  .more dl > div { padding-bottom: 20px; }
+}
+@media (max-width: 640px) {
+  .top nav a:not(.nav-install):not(.nav-docs):not(.nav-gh) { display: none; }
+  .top { --bar-l: 16px; }
+  .top-in { height: 56px; }
+  .floating .top-in { height: 68px; }
+  .wall-hero { padding-top: 76px; }
+  .wall { border-radius: 20px; }
+  .install { flex-wrap: wrap; width: 100%; padding: 10px 10px 10px 14px; }
+  .install code { white-space: pre-wrap; overflow-wrap: anywhere; flex-basis: 100%; font-size: .76rem; }
+  .copy { width: 100%; }
+  .hero .install code, .wall-close .install code { font-size: .72rem; }
+  .shot-win .term { font-size: 9.5px; }
+  .help-win table { font-size: .76rem; }
+  .help-win tr { display: grid; padding: 10px 16px; border-top: 1px solid #2c2c2c; }
+  .help-win tr:first-child { border-top: 0; }
+  .help-win th, .help-win td, .help-win tr:first-child th, .help-win tr:first-child td, .help-win tr:last-child th, .help-win tr:last-child td { border: 0; padding: 0; width: auto; white-space: normal; }
+  .help-win td { margin-top: 3px; }
+  .chrome .ctl { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .rise, .call { animation: none; }
+}
+
+/* === flair options (previewed with ?fx=hero,panels,texture,beam; the chosen ones get baked in) ====================== */
+
+/* hero: a soft coral light falls on Force's window from above; the window starts tilted back and straightens as it
+   scrolls into place (--tilt 1 to 0, set by site.js) */
+.fx-hero .hero { position: relative; }
+.fx-hero .hero::before { content: ""; position: absolute; z-index: -1; pointer-events: none; left: 50%; width: min(1400px, 130%);
+  top: clamp(380px, 38vw, 560px); height: 900px; transform: translateX(-50%);
+  background: radial-gradient(ellipse 46% 34% at 50% 18%, rgba(217, 119, 87, .26), rgba(217, 119, 87, .08) 45%, transparent 72%); }
+.fx-hero .stage { transform: perspective(1800px) rotateX(calc(var(--tilt, 0) * 16deg)) scale(calc(1 - var(--tilt, 0) * .06));
+  transform-origin: 50% 0; will-change: transform;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .09), 0 -1px 0 rgba(255, 210, 190, .25), 0 40px 120px -20px rgba(0, 0, 0, .9),
+              0 -30px 120px -40px rgba(217, 119, 87, .45); }
+
+/* panels: a light follows the cursor across each panel and its edge; the excerpts move like Force does */
+.fx-panels .panel::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
+  transition: opacity .3s; background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0), rgba(217, 119, 87, .10), transparent 60%); }
+.fx-panels .panel::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; padding: 1px; opacity: 0;
+  transition: opacity .3s; background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 0), rgba(246, 194, 164, .55), transparent 65%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+.fx-panels .panel:hover::before, .fx-panels .panel:hover::after { opacity: 1; }
+.fx-panels .panel { transition: transform .4s var(--ease); }
+.fx-panels .panel:hover { transform: translateY(-2px); }
+.fx-panels .shot .bell { display: inline-block; animation: bell 2.4s var(--ease) infinite; transform-origin: 50% 10%; }
+@keyframes bell { 0%, 60%, 100% { transform: rotate(0); } 66% { transform: rotate(14deg); } 74% { transform: rotate(-12deg); }
+                  82% { transform: rotate(8deg); } 90% { transform: rotate(-4deg); } }
+.fx-panels .shot .row-need { animation: needrow 2.4s ease-in-out infinite; }
+@keyframes needrow { 50% { background-color: rgba(240, 100, 94, .16); } }
+.fx-panels .p-limits .bar { display: inline-block; clip-path: inset(0 100% 0 0); transition: clip-path 1.4s var(--ease) .2s; }
+.fx-panels .p-limits.seen .bar { clip-path: inset(0 0 0 0); }
+
+/* texture: a fine grid behind the hero that fades out, film grain, panels with a lit top edge and layered depth */
+.fx-texture body { background-image: radial-gradient(ellipse 80% 55% at 50% 0%, #202020, var(--page) 70%); background-repeat: no-repeat; }
+.fx-texture .hero { position: relative; }
+.fx-texture .hero::after { content: ""; position: absolute; z-index: -2; pointer-events: none; inset: -60px -50vw 30% -50vw;
+  background-image: linear-gradient(rgba(255, 255, 255, .045) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .045) 1px, transparent 1px);
+  background-size: 56px 56px; background-position: center top;
+  -webkit-mask-image: radial-gradient(ellipse 50% 60% at 50% 20%, #000 20%, transparent 75%); mask-image: radial-gradient(ellipse 50% 60% at 50% 20%, #000 20%, transparent 75%); }
+.fx-texture body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.fx-texture .panel, .fx-texture .cmd-panel { background: linear-gradient(180deg, #222 0%, #1b1b1b 60%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .09), inset 0 0 0 1px rgba(255, 255, 255, .06),
+              0 1px 2px rgba(0, 0, 0, .5), 0 12px 32px -12px rgba(0, 0, 0, .7); }
+.fx-texture .install { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), inset 0 0 0 1px rgba(255, 255, 255, .09), 0 10px 30px -10px rgba(0, 0, 0, .8); }
+
+/* beam: a short coral light runs round the hero window's edge; the closing line stands in front of a large lit bolt */
+@property --beam { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.fx-beam .stage::after { content: ""; position: absolute; inset: 0; z-index: 6; pointer-events: none; border-radius: inherit; padding: 1.5px;
+  background: conic-gradient(from var(--beam), transparent 0 78%, rgba(217, 119, 87, .0) 80%, #d97757 90%, #ffd2bd 93%, transparent 95%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: beam 6s linear infinite; }
+@keyframes beam { to { --beam: 360deg; } }
+.fx-beam .last { position: relative; isolation: isolate; padding-top: clamp(200px, 20vw, 250px); }
+.fx-beam .last::before { content: ""; position: absolute; z-index: -1; left: 50%; top: clamp(-20px, 1vw, 10px); width: 420px; height: 300px;
+  transform: translateX(-50%); pointer-events: none;
+  background: radial-gradient(closest-side, rgba(217, 119, 87, .32), rgba(217, 119, 87, .08) 55%, transparent); }
+.fx-beam .last::after { content: ""; position: absolute; left: 50%; top: clamp(40px, 5vw, 66px); width: clamp(84px, 9vw, 112px); aspect-ratio: 1;
+  transform: translateX(-50%); pointer-events: none;
+  background: linear-gradient(160deg, #ffd9c7 0%, #f09a78 35%, #d97757 70%, #a5553b 100%);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13.8 2 5 13.6h5.8L9.2 22 19 9.9h-5.9z'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13.8 2 5 13.6h5.8L9.2 22 19 9.9h-5.9z'/%3E%3C/svg%3E") center / contain no-repeat; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-hero .stage { transform: none; }
+  .fx-beam .stage::after, .fx-panels .shot .bell, .fx-panels .shot .row-need { animation: none; }
+  .fx-panels .p-limits .bar { clip-path: none; transition: none; }
+}
+

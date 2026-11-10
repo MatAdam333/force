@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Force — the code cockpit</title>
+<meta name="description" content="Force keeps your AI coding agent sessions running, through closed terminals and reboots, and shows them all in one terminal. One line to install, nothing to set up.">
+<meta property="og:title" content="Force — the code cockpit">
+<meta property="og:description" content="Every coding agent you run, in one terminal.">
+<meta property="og:image" content="media/brag.jpg">
+<meta property="og:video" content="media/brag.mp4">
+<meta name="theme-color" content="#141414">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23212121'/%3E%3Cpath d='M18.5 4 8 18h7l-2 10 11-15h-7z' fill='%23d97757'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/unbounded.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/dejavu-sans-mono.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="alternate" type="text/markdown" href="index.md" title="Markdown for agents">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <a class="mark" href="./" aria-label="Force home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.8 2 5 13.6h5.8L9.2 22 19 9.9h-5.9z"/></svg>Force
+    </a>
+    <nav aria-label="Sections">
+      <a href="#film">Try it</a>
+      <a href="#features">Features</a>
+      <a href="#commands">Commands</a>
+      <a class="nav-docs" href="docs.html">Docs</a>
+      <a class="nav-gh" href="{{repo}}" data-repo aria-label="Force on GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg></a>
+      <a class="nav-install" href="#install">Install</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section class="hero" aria-labelledby="pitch">
+  <div class="wall wall-hero">
+    <div class="hero-in rise">
+      <h1 id="pitch">Every coding agent you run, in one terminal.</h1>
+      <p class="sub">Force keeps your Claude Code and OpenCode sessions running on your machine or a server, through closed
+         terminals and reboots, and tells you which one needs you, on your phone too.</p>
+      <div class="install" id="install">
+        <code id="install-line"><span class="prompt" aria-hidden="true">$</span> <span class="nb">curl -fsSL</span> <span class="nb">https://useforce.cc/install.sh | sh</span></code>
+        <button type="button" class="copy" data-copy="install-line">Copy</button>
+      </div>
+      <p class="after">Then type <code>force</code>. Linux, x86-64. No root, no packages, no config files.</p>
+    </div>
+    <figure class="stage" id="film">
+      <div class="window" id="cockpit" inert>
+        <div class="chrome" aria-hidden="true"><span></span><b>force</b><span class="ctl"><svg viewBox="0 0 44 10"><path d="M1 5.5h8M18 1.5h7v7h-7zM35 1.5l7 7m0-7-7 7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></span></div>
+        <div class="term-wrap" tabindex="0" role="application"
+             aria-label="Force's window, as text. Seven sessions in the sidebar; billing-fix needs permission. Up and down arrows switch sessions; Ctrl+Space opens the menu.">
+          <div class="screen" data-screen="api">
+            <pre class="term" data-view="shell" hidden data-include="cockpit-shell.html"></pre>
+            <pre class="term" data-view="api" data-include="cockpit-api.html"></pre>
+            <pre class="term" data-view="billing-fix" hidden data-include="cockpit-billing-fix.html"></pre>
+            <pre class="term" data-view="docs-site" hidden data-include="cockpit-docs-site.html"></pre>
+            <pre class="term" data-view="infra" hidden data-include="cockpit-infra.html"></pre>
+            <pre class="term" data-view="mobile" hidden data-include="cockpit-mobile.html"></pre>
+            <pre class="term" data-view="migration-2024" hidden data-include="cockpit-migration-2024.html"></pre>
+            <pre class="term menu" data-menu="shell" hidden data-include="menu-shell.html"></pre>
+            <pre class="term menu" data-menu="api" hidden data-include="menu-api.html"></pre>
+            <pre class="term menu" data-menu="billing-fix" hidden data-include="menu-billing-fix.html"></pre>
+            <pre class="term menu" data-menu="docs-site" hidden data-include="menu-docs-site.html"></pre>
+            <pre class="term menu" data-menu="infra" hidden data-include="menu-infra.html"></pre>
+            <pre class="term menu" data-menu="mobile" hidden data-include="menu-mobile.html"></pre>
+            <pre class="term menu" data-menu="migration-2024" hidden data-include="menu-migration-2024.html"></pre>
+            <div class="call" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+      <div class="phone" id="phone" inert>
+        <div class="phone-bar">
+          <button type="button" class="phone-back" hidden>&#8249; Sessions</button>
+          <b class="phone-title">Force</b>
+          <button type="button" class="phone-pill">Tap a session</button>
+        </div>
+        <div class="screen phone-screen" role="group" aria-label="Force at phone width: the session list; tap a session to open it.">
+          <pre class="term" data-view="list" data-include="phone-list.html"></pre>
+          <pre class="term" data-view="shell" hidden data-include="phone-shell.html"></pre>
+          <pre class="term" data-view="api" hidden data-include="phone-api.html"></pre>
+          <pre class="term" data-view="billing-fix" hidden data-include="phone-billing-fix.html"></pre>
+          <pre class="term" data-view="docs-site" hidden data-include="phone-docs-site.html"></pre>
+          <pre class="term" data-view="infra" hidden data-include="phone-infra.html"></pre>
+          <pre class="term" data-view="mobile" hidden data-include="phone-mobile.html"></pre>
+          <pre class="term" data-view="migration-2024" hidden data-include="phone-migration-2024.html"></pre>
+        </div>
+      </div>
+      <video id="film-video" poster="media/poster.jpg" data-poster-phone="media/poster-phone.jpg" muted playsinline preload="auto"
+             aria-label="Seven terminal windows, one per coding agent, collapse into Force's sidebar; a session asking for permission is opened with one click; the terminal closes and the agents keep working; the window opens again, and stays open to click around in.">
+        <source media="(max-width: 640px)" src="media/brag-phone.webm" type="video/webm">
+        <source media="(max-width: 640px)" src="media/brag-phone.mp4" type="video/mp4">
+        <source src="media/brag.webm" type="video/webm">
+        <source src="media/brag.mp4" type="video/mp4">
+      </video>
+      <button type="button" class="play" aria-label="Pause the film"><span aria-hidden="true"></span></button>
+      <button type="button" class="replay" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.2 8a4.8 4.8 0 1 0 1.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2.4 2.2v3.6H6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Replay the film</button>
+    </figure>
+    <p class="film-cap" aria-hidden="true"></p>
+  </div>
+  <div class="stage-foot">
+    <p class="hint" aria-live="polite">When the film ends, the window stays: click around in it.</p>
+    <p class="note">Force itself, captured as text from running sessions.</p>
+  </div>
+</section>
+
+<section id="features" class="rows" aria-label="Features">
+  <article class="row">
+    <div class="txt">
+      <h2>You see who needs you.</h2>
+      <p>A permission prompt or a question anywhere shows in the sidebar and as a count at the top. One click takes you
+         there, and you answer it in place.</p>
+    </div>
+    <figure class="wall card wall-red"><div class="shot-win" role="img" aria-label="Force with billing-fix selected: the sidebar marks it red, needs permission, and the agent asks to edit test_invoice.py."><div class="chrome" aria-hidden="true"><span></span><b>force — billing-fix</b><span class="ctl"><svg viewBox="0 0 44 10"><path d="M1 5.5h8M18 1.5h7v7h-7zM35 1.5l7 7m0-7-7 7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></span></div><pre class="term desk-only" data-include="cockpit-billing-fix.html"></pre><pre class="term phone-only" data-include="phone-billing-fix.html"></pre></div></figure>
+  </article>
+
+  <article class="row flip">
+    <div class="txt">
+      <h2>Close the terminal. It keeps working.</h2>
+      <p>Sessions live in tmux on the machine, not in your terminal window. Drop the connection or restart the machine:
+         every session comes back with its conversation, and one that crashes restarts by itself.</p>
+    </div>
+    <figure class="wall card wall-amber zoom"><div class="shot-win" role="img" aria-label="Force with mobile selected: the agent is running the test suite, marked amber, running a command."><div class="chrome" aria-hidden="true"><span></span><b>force — mobile</b><span class="ctl"><svg viewBox="0 0 44 10"><path d="M1 5.5h8M18 1.5h7v7h-7zM35 1.5l7 7m0-7-7 7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></span></div><pre class="term desk-only" data-include="cockpit-mobile.html"></pre><pre class="term phone-only" data-include="phone-mobile.html"></pre></div></figure>
+  </article>
+
+  <article class="row">
+    <div class="txt">
+      <h2>Your turn, on your phone too.</h2>
+      <p>A session that finishes while you are elsewhere waits for you, marked your turn. Give Force one command and it
+         runs it when a session needs you or finishes: ntfy, your own push server, a desktop notification.</p>
+      <p class="go"><a href="docs.html#notifications">Set up notifications</a></p>
+    </div>
+    <figure class="wall card wall-green"><div class="shot-win" role="img" aria-label="Force with docs-site selected: finished while you were away, marked green, your turn."><div class="chrome" aria-hidden="true"><span></span><b>force — docs-site</b><span class="ctl"><svg viewBox="0 0 44 10"><path d="M1 5.5h8M18 1.5h7v7h-7zM35 1.5l7 7m0-7-7 7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></span></div><pre class="term desk-only" data-include="cockpit-docs-site.html"></pre><pre class="term phone-only" data-include="phone-docs-site.html"></pre></div></figure>
+  </article>
+
+  <article class="row flip">
+    <div class="txt">
+      <h2>Every agent. Every machine.</h2>
+      <p>Claude Code, OpenCode and plain shells in one list, with your Claude plan's five-hour and weekly limits under
+         it. <code>force host add</code> puts a server's sessions one click away from your laptop's.</p>
+    </div>
+    <figure class="wall card wall-coral bl"><div class="shot-win" role="img" aria-label="The bottom of Force's sidebar: the machine devbox, and the Claude limits, 34% of five hours and 18% of the week."><div class="chrome" aria-hidden="true"><span></span><b>force — api</b><span class="ctl"><svg viewBox="0 0 44 10"><path d="M1 5.5h8M18 1.5h7v7h-7zM35 1.5l7 7m0-7-7 7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></span></div><pre class="term desk-only" data-include="cockpit-api.html"></pre><pre class="term phone-only" data-include="phone-list.html"></pre></div></figure>
+  </article>
+</section>
+
+<section class="more" aria-label="More">
+  <dl>
+    <div><dt>It names itself</dt>
+      <dd>Start a session without a name and Force names it after your first message. Claude Code sessions also open
+          in the Claude app under their Force name.</dd></div>
+    <div><dt>Scripts and agents drive it</dt>
+      <dd><code>force prompt</code>, <code>wait</code> and <code>read</code> hand work to a session and collect the
+          answer. <code>force skill</code> is the guide an agent reads to run Force itself.</dd></div>
+    <div><dt>Nothing to set up</dt>
+      <dd>No root, no packages, no terminal profile. Force brings its own tmux and paints its own theme in any
+          terminal or ssh login.</dd></div>
+  </dl>
+</section>
+
+<section id="commands" class="commands" aria-labelledby="commands-h">
+  <div class="sec-head">
+    <h2 id="commands-h">The commands you will use.</h2>
+    <p>Everything else is in the menu, <kbd>Ctrl</kbd>+<kbd>Space</kbd> inside Force, and in <a href="docs.html">the docs</a>.</p>
+  </div>
+  <div class="wall wall-graphite">
+    <div class="help-win">
+      <div class="chrome" aria-hidden="true"><span></span><b>force help</b><span class="ctl"><svg viewBox="0 0 44 10"><path d="M1 5.5h8M18 1.5h7v7h-7zM35 1.5l7 7m0-7-7 7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></span></div>
+      <table>
+        <tbody>
+          <tr><th scope="row"><code>force</code></th><td>Open the cockpit.</td></tr>
+          <tr><th scope="row"><code>force new [NAME]</code></th><td>Start a session in the current folder; without a name it is named after your first message.</td></tr>
+          <tr><th scope="row"><code>force import</code></th><td>List sessions Force doesn't manage yet; <code>force import ID</code> takes one over.</td></tr>
+          <tr><th scope="row"><code>force host add NAME</code></th><td>Add another machine you reach with ssh.</td></tr>
+          <tr><th scope="row"><code>force prompt NAME TEXT --wait</code></th><td>Send a session a prompt from a script or another agent and wait for its answer.</td></tr>
+          <tr><th scope="row"><code>force status working</code></th><td>From a script in a shell session: show what it is doing on its card.</td></tr>
+          <tr><th scope="row"><code>force settings</code></th><td>Show and change settings, such as the command that notifies you.</td></tr>
+          <tr><th scope="row"><code>force update</code></th><td>Install the newest release. Sessions keep running.</td></tr>
+          <tr><th scope="row"><code>force uninstall</code></th><td>Remove Force; your conversations stay.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="last" aria-labelledby="last-h">
+  <div class="wall wall-close">
+    <h2 id="last-h">Take a seat.</h2>
+    <p>Force is the cockpit for every coding agent you run. One line installs it, no root needed.</p>
+    <div class="install">
+      <code id="install-line-2"><span class="prompt" aria-hidden="true">$</span> <span class="nb">curl -fsSL</span> <span class="nb">https://useforce.cc/install.sh | sh</span></code>
+      <button type="button" class="copy" data-copy="install-line-2">Copy</button>
+    </div>
+    <p class="close-more">Then type <code>force</code>. Everything else: <a href="docs.html">the docs</a>.</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="foot-top">
+    <p class="foot-legal">Open source under the <a href="LICENSE.txt">MIT licence</a>: provided as is, without warranty of any kind, and used at your own risk; its author is not liable for any damage or loss from using it. An independent project, not affiliated with Anthropic or the makers of OpenCode. Claude and Claude Code are trademarks of Anthropic, PBC.</p>
+    <nav class="foot-nav" aria-label="Footer">
+      <a class="gh" href="{{repo}}" data-repo><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>
+      <a href="{{repo}}/issues/new?template=bug_report.yml" data-repo>Report an issue</a>
+      <a href="{{repo}}/issues/new?template=feature_request.yml" data-repo>Suggest an idea</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="mailto:hello@useforce.cc">hello@useforce.cc</a>
+    </nav>
+  </div>
+  <div class="foot-word" aria-hidden="true">Force</div>
+</footer>
+
+<script src="site.js" defer></script>
+<script src="agent-tools.js" defer></script>
+</body>
+</html>

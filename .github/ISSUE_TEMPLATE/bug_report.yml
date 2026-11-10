@@ -1,0 +1,81 @@
+name: Bug report
+description: Something in Force doesn't work the way the docs say it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. Before you file: `force doctor --fix` repairs the most common problems, and
+        `force explain NAME` tells you why a session shows the state it does.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw. Screenshots of the cockpit help a lot.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce it
+      placeholder: |
+        1. force new demo
+        2. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Force version
+      description: The output of `force --version`.
+      placeholder: force 1.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Which part
+      options:
+        - A Claude Code session
+        - An OpenCode session
+        - A shell session
+        - The cockpit itself (sidebar, header, menu, keys)
+        - Another machine (force host)
+        - Install, update or uninstall
+        - Notifications
+        - Scripts and agents (force prompt, wait, read, keys, status)
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Your setup
+      description: >-
+        Linux distribution, terminal app, and whether you use Force locally or over ssh. For agent sessions, the
+        output of `claude --version` or `opencode --version`.
+      placeholder: |
+        Ubuntu 24.04, Ghostty, over ssh from a Mac
+        claude 2.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: force doctor
+      description: The output of `force doctor`.
+      render: text
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log
+      description: >-
+        If it's about the background service: `journalctl --user -u force --since "1 hour ago"`. Check it for
+        project names, paths or anything else you'd rather not post publicly.
+      render: text

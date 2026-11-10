@@ -1,0 +1,7 @@
+[package]
+name = "force-intro-motion"
+version = "0.1.0"
+edition = "2021"
+description = "Exports the intro's classic procedural motion (footstep walk, stepping turn, sit-down beats) as joint positions per frame, for blender/scene.py"
+
+[dependencies]

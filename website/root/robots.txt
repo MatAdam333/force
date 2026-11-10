@@ -1,0 +1,6 @@
+# Force, the code cockpit: everything here is public.
+User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+Sitemap: https://useforce.cc/sitemap.xml

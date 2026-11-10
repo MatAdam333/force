@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en" class="floating">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Force privacy</title>
+<meta name="description" content="What the Force website and the Force app process about you: no cookies, no analytics, no telemetry, and the little that remains.">
+<meta name="theme-color" content="#141414">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23212121'/%3E%3Cpath d='M18.5 4 8 18h7l-2 10 11-15h-7z' fill='%23d97757'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="alternate" type="text/markdown" href="privacy.md" title="Markdown for agents">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body class="docs-page">
+
+<header class="top">
+  <div class="top-in">
+    <a class="mark" href="./" aria-label="Force home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.8 2 5 13.6h5.8L9.2 22 19 9.9h-5.9z"/></svg>Force
+    </a>
+    <nav aria-label="Site">
+      <a href="./">Overview</a>
+      <a class="nav-docs" href="docs.html">Docs</a>
+      <a class="nav-gh" href="{{repo}}" data-repo aria-label="Force on GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg></a>
+      <a class="nav-install" href="docs.html#install">Install</a>
+    </nav>
+  </div>
+</header>
+
+<div class="docs solo">
+  <main class="doc">
+    <div class="doc-head">
+      <h1>Privacy</h1>
+      <p class="lead">This site sets no cookies, runs no analytics and has no forms, and Force sends no telemetry.
+        This page covers what is still processed, by whom, and what you can do about it.</p>
+      <p class="updated">Last updated 10 November 2026</p>
+    </div>
+
+    <section id="who">
+      <h2>Who is responsible</h2>
+      <p>Force and this website are made by Zalán Demeter, who is the controller for the processing described here.
+        Write to <a href="mailto:hello@useforce.cc">hello@useforce.cc</a> with any question or request.</p>
+    </section>
+
+    <section id="site">
+      <h2>Visiting this site</h2>
+      <p>Loading a page sends your IP address and the usual request details (the address you asked for, the time,
+        your browser's user agent and the referring page). Two services handle these requests:</p>
+      <ul>
+        <li><strong>Cloudflare, Inc.</strong> delivers the site and protects it from abuse. Cloudflare may also ask
+          your browser to report failed connections to it (Network Error Logging).</li>
+        <li><strong>GitHub, Inc.</strong> hosts the files on GitHub Pages and logs visitor IP addresses for
+          security.</li>
+      </ul>
+      <p>The purpose is to deliver the site and keep it secure; the legal basis is legitimate interest (GDPR
+        Art. 6(1)(f)). The logs are kept by Cloudflare and GitHub under their own policies
+        (<a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>,
+        <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub</a>)
+        and are not used to identify or profile visitors.</p>
+      <p>Fonts, the film and scripts all come from useforce.cc; pages load nothing from other sites and store
+        nothing on your device.</p>
+    </section>
+
+    <section id="app">
+      <h2>Using Force</h2>
+      <p>Force runs on your own machines and sends nothing about you or your sessions to its developer. It makes
+        these requests:</p>
+      <ul>
+        <li><strong>Update check:</strong> once a day it reads the install script from useforce.cc to see whether a
+          newer version exists, and <code>force update</code> downloads it from useforce.cc or GitHub. This is the
+          same processing as visiting the site.</li>
+        <li><strong>OpenCode updates:</strong> if Force manages OpenCode for you, it asks GitHub for the latest
+          OpenCode release every six hours and downloads it from there.</li>
+      </ul>
+      <p>Claude Code and OpenCode talk to their own providers under those providers' terms; Force does not sit in
+        between. Notifications go only where your own notify command sends them.</p>
+    </section>
+
+    <section id="transfers">
+      <h2>Transfers outside the EU</h2>
+      <p>Cloudflare and GitHub are based in the United States. Both are certified under the EU–US Data Privacy
+        Framework and use the European Commission's standard contractual clauses.</p>
+    </section>
+
+    <section id="rights">
+      <h2>Your rights</h2>
+      <p>You can ask for access to your data, its correction or erasure, restriction of its processing, and you
+        can object to processing based on legitimate interest. The request logs are held by Cloudflare and GitHub,
+        so write to <a href="mailto:hello@useforce.cc">hello@useforce.cc</a> and you will get help reaching
+        them.</p>
+      <p>You can also complain to the data protection authority where you live or work, or to Hungary's
+        <a href="https://naih.hu/">NAIH</a>.</p>
+    </section>
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="foot-top">
+    <p class="foot-legal">Open source under the <a href="LICENSE.txt">MIT licence</a>: provided as is, without warranty of any kind, and used at your own risk; its author is not liable for any damage or loss from using it. An independent project, not affiliated with Anthropic or the makers of OpenCode. Claude and Claude Code are trademarks of Anthropic, PBC.</p>
+    <nav class="foot-nav" aria-label="Footer">
+      <a class="gh" href="{{repo}}" data-repo><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>
+      <a href="{{repo}}/issues/new?template=bug_report.yml" data-repo>Report an issue</a>
+      <a href="{{repo}}/issues/new?template=feature_request.yml" data-repo>Suggest an idea</a>
+      <a href="privacy.html" aria-current="page">Privacy</a>
+      <a href="mailto:hello@useforce.cc">hello@useforce.cc</a>
+    </nav>
+  </div>
+  <div class="foot-word" aria-hidden="true">Force</div>
+</footer>
+
+<script src="agent-tools.js" defer></script>
+</body>
+</html>

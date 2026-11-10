@@ -1,0 +1,512 @@
+#!/usr/bin/env python3
+"""Join a force session someone shared with you on this host.
+
+    python3 /tmp/force-share-<owner>/force-join <owner>/<session>
+
+Shows that one session live (read-only or read/write, as shared). Ctrl+Q leaves (Ctrl+] too; in a
+read-only share also Ctrl+C or q). A local history pager: PageUp (and in read-only also Up/k/Home)
+opens the shared history; q/Esc/Ctrl+C returns to the live view. Standalone: Python 3 standard
+library only.
+"""
+import json
+import os
+import pwd
+import select
+import signal
+import socket
+import struct
+import sys
+import termios
+import tty
+import unicodedata
+
+HDR = struct.Struct(">cI")
+
+# leave / history tokens are produced by parse_keys()
+LEAVE_TOKENS = ("ctrl-q", "ctrl-]")                 # any keyboard layout
+LEAVE_RO_TOKENS = ("ctrl-c", "q", "Q")             # read-only: Ctrl+C, q
+ENTER_HISTORY_RO = ("up", "k", "home", "pgup")
+ENTER_HISTORY_RW = ("pgup",)
+
+# display helpers / SGR fragments
+_WHITE = "\x1b[37m"
+_BRIGHT = "\x1b[1;37m"
+_GREEN = "\x1b[38;2;135;192;143m"
+_DIM = "\x1b[38;2;150;150;150m"
+_BOLD = "\x1b[1m"
+_USER_BG = "\x1b[48;2;48;48;48m"
+_HIST_COLOUR = "\x1b[38;2;220;220;220;48;2;58;58;58m"
+
+# prefix string per entry kind -> (prefix, display width of prefix)
+_PREFIX = {
+    "user": ("> ", 2),
+    "agent": ("● ", 2),
+    "tool": ("● ", 2),
+    "result": ("  ⎿  ", 5),
+}
+_KINDS = set(_PREFIX) | {"note", "plain"}
+
+
+def frame(kind: bytes, payload: bytes) -> bytes:
+    return HDR.pack(kind, len(payload)) + payload
+
+
+def size():
+    try:
+        cols, rows = os.get_terminal_size(sys.stdout.fileno())
+    except OSError:
+        cols, rows = 80, 24
+    return rows, cols
+
+
+def status_line(info: dict) -> bytes:
+    """Bottom line of the guest terminal: what this is and how to leave."""
+    rows, cols = size()
+    mode = info.get("mode", "?")
+    keys = "PgUp history · Ctrl+Q leaves" if mode == "read/write" else \
+           "↑ or PgUp history · Ctrl+Q or q leaves"
+    text = f" viewing {info.get('owner', '?')}/{info.get('session', '?')} · {mode} · {keys} "
+    colour = "\x1b[1;38;2;255;255;255;48;2;90;42;42m" if mode == "read/write" else \
+             _HIST_COLOUR
+    return (f"\x1b7\x1b[{rows};1H" + colour + text[:cols] + "\x1b[K\x1b[0m\x1b8").encode()
+
+
+def history_status(info: dict, rows: int, cols: int) -> str:
+    """History mode bottom line (read-only colours)."""
+    text = (f" history · {info.get('owner', '?')}/{info.get('session', '?')} · "
+            "↑↓ PgUp PgDn Home End · q back to live · Ctrl+Q leaves ")
+    return f"\x1b7\x1b[{rows};1H{_HIST_COLOUR}{text[:cols]}\x1b[K\x1b[0m\x1b8"
+
+
+# --------------------------------------------------------------------------- keys
+_CSI_KEYS = {
+    b"\x1b[A": "up", b"\x1bOA": "up",
+    b"\x1b[B": "down", b"\x1bOB": "down",
+    b"\x1b[5~": "pgup", b"\x1b[6~": "pgdn",
+    b"\x1b[H": "home", b"\x1b[1~": "home", b"\x1bOH": "home",
+    b"\x1b[F": "end", b"\x1b[4~": "end", b"\x1bOF": "end",
+}
+
+
+def parse_keys(data: bytes) -> list:
+    """Split a tty byte stream into key tokens (see module docstring / tests)."""
+    tokens = []
+    i, n = 0, len(data)
+    while i < n:
+        b = data[i]
+        if b == 0x1b:                                  # ESC
+            if i == n - 1:
+                tokens.append("esc")
+                break
+            if data[i + 1] == 0x1b:                   # ESC ESC -> esc then continue
+                tokens.append("esc")
+                i += 1
+                continue
+            if data[i + 1] == 0x5b:                   # CSI [
+                j = i + 2
+                while j < n and not (0x40 <= data[j] <= 0x7e):
+                    j += 1
+                if j < n:
+                    tokens.append(_CSI_KEYS.get(data[i:j + 1], "unknown"))
+                    i = j + 1
+                else:                                  # unterminated CSI
+                    tokens.append("unknown")
+                    i = n
+            elif data[i + 1] == 0x4f:                 # SS3 O + 1 byte
+                if i + 2 < n:
+                    tokens.append(_CSI_KEYS.get(data[i:i + 3], "unknown"))
+                    i += 3
+                else:
+                    tokens.append("unknown")
+                    i = n
+            else:                                      # other escape
+                tokens.append("unknown")
+                i += 2
+            continue
+        if b == 0x03:
+            tokens.append("ctrl-c")
+        elif b == 0x11:
+            tokens.append("ctrl-q")
+        elif b == 0x1d:
+            tokens.append("ctrl-]")
+        elif 0x20 <= b < 0x7f:
+            tokens.append(chr(b))
+        else:
+            tokens.append("unknown")
+        i += 1
+    return tokens
+
+
+# ----------------------------------------------------------------------- layout
+def display_width(s: str) -> int:
+    """Display columns of s: East Asian Wide/Fullwidth = 2, combining = 0, else 1."""
+    width = 0
+    for ch in s:
+        if unicodedata.combining(ch):
+            continue
+        width += 2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1
+    return width
+
+
+def _char_width(ch: str) -> int:
+    if unicodedata.combining(ch):
+        return 0
+    return 2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1
+
+
+def _sanitize(text: str) -> str:
+    """Drop control chars we never draw (kept: explicit newlines)."""
+    out = []
+    for ch in text:
+        o = ord(ch)
+        if ch == "\n":
+            out.append(ch)
+        elif o < 0x20 or o == 0x7f or 0x80 <= o <= 0x9f:
+            continue
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
+def _cut(s: str, avail: int) -> str:
+    """Longest prefix of s whose display width <= avail (never splits a wide char)."""
+    width = 0
+    i = 0
+    for ch in s:
+        cw = _char_width(ch)
+        if width + cw > avail:
+            break
+        width += cw
+        i += 1
+    return s[:i] if i else s[:1]
+
+
+def _wrap(text: str, avail: int) -> list:
+    """Greedy word-wrap text to display width `avail`, hard-splitting long words."""
+    if avail <= 0:
+        return [text] if text else []
+    lines = []
+    cur = ""
+    cur_w = 0
+    for word in text.split(" "):
+        ww = display_width(word)
+        if ww > avail:                                # hard-wrap this word
+            if cur:
+                lines.append(cur)
+                cur, cur_w = "", 0
+            chunk = word
+            while chunk and display_width(chunk) > avail:
+                cut = _cut(chunk, avail)
+                lines.append(cut)
+                chunk = chunk[len(cut):]
+            if chunk:
+                cur, cur_w = chunk, display_width(chunk)
+        else:
+            sep = 1 if cur else 0
+            if cur_w + sep + ww <= avail:
+                if cur:
+                    cur += " "
+                    cur_w += 1
+                cur += word
+                cur_w += ww
+            else:
+                lines.append(cur)
+                cur, cur_w = word, ww
+    if cur:
+        lines.append(cur)
+    return lines or [""]                              # an empty line stays a (blank) row
+
+
+def _render(kind: str, prefix: str, body: str, first: bool, cols: int) -> str:
+    visible = prefix + body if first else body
+    pad = max(cols - display_width(visible), 0)
+    if kind == "user":
+        return _BRIGHT + _USER_BG + visible + (" " * pad)
+    if kind == "agent":
+        return _WHITE + "● " + "\x1b[0m" + body if first else body
+    if kind == "tool":
+        return _GREEN + "● " + _BOLD + body if first else _BOLD + body
+    if kind == "result":
+        return _DIM + visible
+    return visible                                        # plain
+
+
+def _entry_rows(kind: str, text: str, cols: int) -> list:
+    if kind == "note":
+        avail = max(cols - 6, 1)
+        rows = []
+        for seg in text.split("\n"):
+            for piece in _wrap(seg, avail):
+                rows.append(_DIM + "── " + piece + " ──")
+        return rows
+    prefix, pwidth = _PREFIX.get(kind, ("", 0))
+    indent = " " * pwidth
+    avail = max(cols - pwidth, 1)
+    rows = []
+    for seg_i, seg in enumerate(text.split("\n")):
+        for w_i, piece in enumerate(_wrap(seg, avail)):
+            first = (seg_i == 0 and w_i == 0)
+            body = piece if first else indent + piece
+            rows.append(_render(kind, prefix, body, first, cols))
+    return rows
+
+
+def layout(entries: list, cols: int) -> list:
+    """Render the whole history to a list of display rows (with SGR codes)."""
+    rows = []
+    prev_kind = None
+    for kind, text in entries:
+        kind = kind if kind in _KINDS else "plain"
+        text = _sanitize(text)
+        if rows and not (prev_kind == "tool" and kind == "result") \
+                and not (prev_kind == "plain" and kind == "plain"):
+            rows.append("")                             # blank line between entries
+        rows.extend(_entry_rows(kind, text, cols))
+        prev_kind = kind
+    return rows
+
+
+# ------------------------------------------------------------------------ pager
+class Pager:
+    """Local history view: a sliding window over layout() rows plus the status line."""
+
+    def __init__(self, rows: int, cols: int):
+        self.rows = rows
+        self.cols = cols
+        self.entries = []
+        self.rows_content = []
+        self.content_rows = 0
+        self.top = 0
+        self._build()
+
+    def _build(self):
+        if not self.entries:
+            self.rows_content = ["no history yet"]
+        else:
+            self.rows_content = layout(self.entries, self.cols)
+        self.content_rows = len(self.rows_content)
+        self._clamp()
+
+    def _clamp(self):
+        max_top = max(0, self.content_rows - (self.rows - 1))
+        self.top = min(max(self.top, 0), max_top)
+
+    def _dist_bottom(self):
+        return max(0, self.content_rows - (self.top + self.rows - 1))
+
+    def set_entries(self, entries: list):
+        self.entries = entries
+        self._build()
+        self.top = self.content_rows                     # scrolled to the bottom
+        self._clamp()
+
+    def resize(self, rows: int, cols: int):
+        dist = self._dist_bottom()
+        self.rows = rows
+        self.cols = cols
+        self._build()
+        self.top = max(0, self.content_rows - (self.rows - 1) - dist)
+        self._clamp()
+
+    def key(self, token: str):
+        page = self.rows - 1
+        step = self.rows - 2
+        max_top = max(0, self.content_rows - page)
+        if token in ("up", "k"):
+            self.top = max(0, self.top - 1)
+        elif token in ("down", "j"):
+            self.top = min(max_top, self.top + 1)
+        elif token in ("pgup", "b"):
+            self.top = max(0, self.top - step)
+        elif token in ("pgdn", " "):
+            self.top = min(max_top, self.top + step)
+        elif token in ("home", "g"):
+            self.top = 0
+        elif token in ("end", "G"):
+            self.top = max_top
+        elif token in ("q", "esc", "ctrl-c"):
+            return "live"
+        elif token in ("ctrl-q", "ctrl-]"):
+            return "leave"
+        else:
+            return None
+        self._clamp()
+        return None
+
+    def screen(self, info: dict) -> bytes:
+        out = []
+        for idx in range(self.rows - 1):
+            row_idx = self.top + idx
+            row = self.rows_content[row_idx] if row_idx < self.content_rows else ""
+            out.append(f"\x1b[{idx + 1};1H{row}\x1b[0m\x1b[K")
+        out.append(history_status(info, self.rows, self.cols))
+        return "".join(out).encode()
+
+
+# ------------------------------------------------------------------------ main
+def main() -> int:
+    if len(sys.argv) != 2 or "/" not in sys.argv[1]:
+        print("usage: force-join <owner>/<session>", file=sys.stderr)
+        return 2
+    owner, name = sys.argv[1].split("/", 1)
+    me = pwd.getpwuid(os.getuid()).pw_name       # the real account, not $USER (su can leave it stale)
+    path = f"/tmp/force-share-{owner}/{name}.{me}.sock"
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        s.connect(path)
+    except OSError:
+        print(f"{owner}/{name} is not shared with you ({me}), or force is not running.", file=sys.stderr)
+        return 1
+    rows, cols = size()
+    s.sendall(frame(b"H", json.dumps({"rows": rows, "cols": cols}).encode()))
+    info = {"owner": owner, "session": name, "mode": "read-only"}
+
+    resize_flag = False
+
+    def on_resize(*_):
+        nonlocal resize_flag
+        resize_flag = True
+        r, c = size()
+        try:
+            s.sendall(frame(b"R", json.dumps({"rows": r, "cols": c}).encode()))
+        except OSError:
+            pass
+    signal.signal(signal.SIGWINCH, on_resize)
+
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    out = sys.stdout.buffer
+    out.write(b"\x1b[?1049h\x1b[H\x1b[2J connecting ...\r\n")    # alternate screen
+    out.flush()
+    buf = b""
+    message = ""
+
+    in_history = False
+    loading = False
+    pager = None
+    latest_d = None
+
+    def enter_history():
+        nonlocal in_history, loading, pager
+        r2, c2 = size()
+        pager = Pager(r2, c2)
+        in_history = True
+        loading = True
+        try:
+            s.sendall(frame(b"Q", b"{}"))
+        except OSError:
+            pass
+        out.write(b"\x1b[?25l")                                   # hide cursor in history
+        out.write(b"\x1b[2J")
+        out.write(f"\x1b[1;1Hloading history …\x1b[0m\x1b[K".encode())
+        out.write(history_status(info, r2, c2).encode())
+        out.flush()
+
+    try:
+        tty.setraw(fd)
+        while True:
+            try:
+                r, _, _ = select.select([fd, s], [], [])
+            except InterruptedError:
+                continue
+            if resize_flag:
+                resize_flag = False
+                if in_history:
+                    r2, c2 = size()
+                    pager.resize(r2, c2)
+                    out.write(pager.screen(info))
+                    out.flush()
+            if fd in r:
+                data = os.read(fd, 4096)
+                if not data:
+                    break
+                if not in_history:
+                    # live mode
+                    leave = False
+                    for t in parse_keys(data):
+                        if t in LEAVE_TOKENS or \
+                                (info["mode"] != "read/write" and t in LEAVE_RO_TOKENS):
+                            leave = True
+                            break
+                        if t in (ENTER_HISTORY_RW if info["mode"] == "read/write"
+                                 else ENTER_HISTORY_RO):
+                            enter_history()
+                            break
+                    if leave:
+                        break
+                    if in_history:
+                        continue                    # just opened history; don't forward
+                    if info["mode"] == "read/write":
+                        s.sendall(frame(b"D", data))
+                else:
+                    # history mode: nothing is sent to the proxy except Q/R frames
+                    action = None
+                    for t in parse_keys(data):
+                        action = pager.key(t)
+                        if action:
+                            break
+                    if action == "leave":
+                        break
+                    if action == "live":
+                        in_history = False
+                        out.write(b"\x1b[?25h")      # live frames restore the cursor
+                        if latest_d is not None:
+                            out.write(latest_d + status_line(info))
+                        else:
+                            out.write(b"\x1b[H\x1b[2J")
+                        out.flush()
+                    else:
+                        out.write(pager.screen(info))
+                        out.flush()
+            if s in r:
+                chunk = s.recv(65536)
+                if not chunk:
+                    message = "the share was closed"
+                    break
+                buf += chunk
+                while len(buf) >= HDR.size:
+                    kind, length = HDR.unpack_from(buf)
+                    if len(buf) < HDR.size + length:
+                        break
+                    payload, buf = buf[HDR.size:HDR.size + length], buf[HDR.size + length:]
+                    if kind == b"M":
+                        try:
+                            info.update(json.loads(payload.decode("utf-8", "replace")))
+                        except ValueError:
+                            pass
+                        if not in_history:
+                            out.write(status_line(info))
+                            out.flush()
+                    elif kind == b"D":
+                        latest_d = payload               # always remember the latest full frame
+                        if not in_history:
+                            out.write(payload + status_line(info))
+                            out.flush()
+                    elif kind == b"T":
+                        if in_history and loading:
+                            try:
+                                entries = json.loads(payload.decode("utf-8", "replace")) \
+                                    .get("entries", [])
+                            except (ValueError, AttributeError):
+                                entries = []
+                            pager.set_entries(entries)
+                            loading = False
+                            out.write(pager.screen(info))
+                            out.flush()
+                    elif kind == b"X":
+                        message = payload.decode("utf-8", "replace")
+                        raise SystemExit
+    except SystemExit:
+        pass
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        out.write(b"\x1b[0m\x1b[?7h\x1b[?25h\x1b[?1049l")
+        out.flush()
+        s.close()
+    if message:
+        print(message)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

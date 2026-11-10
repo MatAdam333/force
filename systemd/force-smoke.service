@@ -1,0 +1,12 @@
+[Unit]
+Description=Force self-test against the real Claude Code and OpenCode (force smoke, SPEC §37)
+Documentation=file://%h/.local/share/force/app/SPEC.md
+After=force.service
+
+[Service]
+Type=oneshot
+Environment=PATH=%h/.local/share/force/app/share/tmux-bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+# only runs when Claude Code, OpenCode or Force changed, the last run is a day old, or it failed 6 h ago
+ExecStart=%h/.local/bin/force smoke --if-due
+Nice=10
+TimeoutStartSec=30min

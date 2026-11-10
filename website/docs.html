@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en" class="floating">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Force documentation</title>
+<meta name="description" content="How to install, use and script Force: the cockpit, keys, sessions, other machines, notifications, settings and every command.">
+<meta name="theme-color" content="#141414">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23212121'/%3E%3Cpath d='M18.5 4 8 18h7l-2 10 11-15h-7z' fill='%23d97757'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="alternate" type="text/markdown" href="docs.md" title="Markdown for agents">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body class="docs-page">
+
+<header class="top">
+  <div class="top-in">
+    <a class="mark" href="./" aria-label="Force home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.8 2 5 13.6h5.8L9.2 22 19 9.9h-5.9z"/></svg>Force
+    </a>
+    <nav aria-label="Site">
+      <a href="./">Overview</a>
+      <a class="nav-docs" href="docs.html" aria-current="page">Docs</a>
+      <a class="nav-gh" href="{{repo}}" data-repo aria-label="Force on GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg></a>
+      <a class="nav-install" href="#install">Install</a>
+    </nav>
+  </div>
+</header>
+
+<div class="docs">
+  <nav class="toc" aria-label="On this page">
+    <p class="toc-h">On this page</p>
+    <a href="#install">Install</a>
+    <a href="#first-run">First run</a>
+    <a href="#cockpit">The cockpit</a>
+    <a href="#keys">Keys and the menu</a>
+    <a href="#sessions">Sessions</a>
+    <a href="#machines">Other machines</a>
+    <a href="#notifications">Notifications</a>
+    <a href="#scripting">Scripts and agents</a>
+    <a href="#settings">Settings</a>
+    <a href="#updates">Updates and uninstall</a>
+    <a href="#trouble">When something is off</a>
+    <a href="#reference">Command reference</a>
+  </nav>
+
+  <main class="doc">
+    <div class="doc-head">
+      <h1>Force documentation</h1>
+      <p class="lead">How to install Force, find your way around the cockpit, and drive sessions from a script or
+        another agent. Everything here is something Force does today.</p>
+    </div>
+
+    <section id="install">
+      <h2>Install</h2>
+      <p>One line, as your user. No root, no packages. Linux on x86-64; it needs only <code>curl</code> or
+        <code>wget</code>.</p>
+      <div class="install">
+        <code id="install-line"><span class="prompt" aria-hidden="true">$</span> <span class="nb">curl -fsSL</span> <span class="nb">https://useforce.cc/install.sh | sh</span></code>
+        <button type="button" class="copy" data-copy="install-line">Copy</button>
+      </div>
+      <p>It unpacks into <code>~/.local/share/force</code> and brings its own tmux 3.4 (and its own Python 3.12 when
+        the system one is older than 3.11). It puts <code>force</code> in <code>~/.local/bin</code> and on your PATH
+        for bash, zsh and fish, starts its two background services (systemd user units; without systemd,
+        <code>force</code> starts them itself) and, on a desktop, installs the icon font.</p>
+      <p>Options go after <code>sh -s --</code>:</p>
+<pre class="code"><span class="p">$</span> curl -fsSL https://useforce.cc/install.sh | sh -s -- --no-fonts</pre>
+      <table class="ref">
+        <tbody>
+          <tr><th scope="row"><code>--no-fonts</code></th><td>Don't install the icon font.</td></tr>
+          <tr><th scope="row"><code>--no-services</code></th><td>Don't create or start the background services; <code>force</code> still works.</td></tr>
+        </tbody>
+      </table>
+      <p>Force doesn't install the agents. For Claude Code:</p>
+<pre class="code"><span class="p">$</span> curl -fsSL https://claude.ai/install.sh | bash</pre>
+    </section>
+
+    <section id="first-run">
+      <h2>First run</h2>
+<pre class="code"><span class="p">$</span> force                 <span class="c"># on the computer you sit at</span>
+<span class="p">$</span> ssh -t devbox force   <span class="c"># or on a server, over ssh</span></pre>
+      <p><code>force</code> opens with a <code>shell</code> session. <strong>+ new</strong> at the bottom of the
+        sidebar starts an agent session (Claude Code or OpenCode) or another shell. Any terminal works: Force paints
+        its own theme, so there's no profile to set up. In an agent, <kbd>Alt</kbd>+<kbd>Enter</kbd> or
+        <kbd>Ctrl</kbd>+<kbd>J</kbd> starts a new line.</p>
+      <p>A short intro plays when you attach; any key skips it. <code>force --no-intro</code> skips it once,
+        <code>force settings set intro false</code> for good.</p>
+    </section>
+
+    <section id="cockpit">
+      <h2>The cockpit</h2>
+      <p>The sidebar on the left lists every session on the machine, the agent you picked fills the rest, and a
+        header above it shows the session's name, agent, model, effort and permission mode. Sessions you aren't
+        looking at that need you or have finished show as counts at the top right.</p>
+      <h3>States</h3>
+      <p>Each session's bar and icon in the sidebar show its state. It comes from the agent itself (its status
+        files and API), not from reading the screen.</p>
+      <table class="ref states">
+        <tbody>
+          <tr style="--s:#f0645e"><th scope="row">needs you</th><td>A permission prompt, a question or a plan approval is waiting.</td></tr>
+          <tr style="--s:#d7af5f"><th scope="row">working</th><td>The agent is running.</td></tr>
+          <tr style="--s:#87c08f"><th scope="row">your turn</th><td>Finished since you last looked at it.</td></tr>
+          <tr style="--s:#8a8a8a"><th scope="row">idle</th><td>Finished, already seen.</td></tr>
+          <tr style="--s:#5a5a5a"><th scope="row">stale</th><td>Idle for more than 12 hours (<code>staleAfterHours</code>).</td></tr>
+          <tr style="--s:#f0645e"><th scope="row">down</th><td>The agent process isn't running; restart it from the menu (<kbd>x</kbd>).</td></tr>
+          <tr style="--s:#5fafd7"><th scope="row">outdated</th><td>Runs an older agent version; upgraded by itself once idle for 10 minutes and off screen.</td></tr>
+        </tbody>
+      </table>
+      <h3>Plan limits</h3>
+      <p>While Claude Code sessions run, the bottom of the sidebar shows your plan's five-hour and weekly windows
+        with their reset times, amber from 70% and red from 90%. The numbers come from Claude Code's status line
+        and update with every reply in any Force session.</p>
+    </section>
+
+    <section id="keys">
+      <h2>Keys and the menu</h2>
+      <p><kbd>Ctrl</kbd>+<kbd>Space</kbd> opens the Force menu with every action and its letter: press the letter or
+        click the item, <kbd>Esc</kbd> closes it. <kbd>Ctrl</kbd>+<kbd>\</kbd> and the <strong>? controls</strong>
+        button in the header open the same menu. There is no prefix key, so the agent never gets your keys by
+        mistake.</p>
+      <table class="ref keys">
+        <tbody>
+          <tr><th scope="row"><kbd>j</kbd></th><td>Jump to a session: type part of its name, <kbd>Enter</kbd> jumps.</td></tr>
+          <tr><th scope="row"><kbd>Tab</kbd></th><td>Back to the session you were in before.</td></tr>
+          <tr><th scope="row"><kbd>h</kbd></th><td>Switch host: this machine or another one (also a click on the host name).</td></tr>
+          <tr><th scope="row"><kbd>n</kbd></th><td>New session: agent or shell, name, folder.</td></tr>
+          <tr><th scope="row"><kbd>t</kbd></th><td>New shell on this host, in the sidebar like a session.</td></tr>
+          <tr><th scope="row"><kbd>r</kbd></th><td>Rename it (tmux, agent and Remote Control name; applied when idle).</td></tr>
+          <tr><th scope="row"><kbd>f</kbd></th><td>Move it to another folder, keeping the conversation and memory.</td></tr>
+          <tr><th scope="row"><kbd>K</kbd> <kbd>J</kbd></th><td>Move it up or down in the sidebar.</td></tr>
+          <tr><th scope="row"><kbd>x</kbd></th><td>Restart it, same conversation.</td></tr>
+          <tr><th scope="row"><kbd>u</kbd></th><td>Upgrade it to the newest agent version now.</td></tr>
+          <tr><th scope="row"><kbd>a</kbd> <kbd>A</kbd></th><td>Archive it; open the archive (<kbd>Enter</kbd> restores, <kbd>d</kbd> deletes).</td></tr>
+          <tr><th scope="row"><kbd>d</kbd></th><td>Delete it for good (asks first).</td></tr>
+          <tr><th scope="row"><kbd>e</kbd></th><td>Restart all sessions, busy ones once idle; for example after changing <code>~/.claude/settings.json</code>.</td></tr>
+          <tr><th scope="row"><kbd>b</kbd></th><td>Hide or show the sidebar.</td></tr>
+          <tr><th scope="row"><kbd>H</kbd></th><td>Health check (<code>force doctor --fix</code>).</td></tr>
+          <tr><th scope="row"><kbd>q</kbd></th><td>Quit this terminal. Sessions keep running.</td></tr>
+        </tbody>
+      </table>
+      <h3>Without the menu</h3>
+      <table class="ref keys">
+        <tbody>
+          <tr><th scope="row"><kbd>Alt</kbd>+<kbd>PgUp</kbd> <kbd>Alt</kbd>+<kbd>PgDn</kbd></th><td>Previous and next session, in every terminal.</td></tr>
+          <tr><th scope="row"><kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd></th><td>Session 1 to 9 (Tilix and Terminator keep these for their own panes).</td></tr>
+          <tr><th scope="row">Click</th><td>A sidebar row switches to it; <strong>+ new</strong> and <strong>archived</strong> open their dialogs.</td></tr>
+        </tbody>
+      </table>
+      <p>To copy, drag to select and right-click: it goes to the clipboard of the computer you sit at, in any
+        terminal and over ssh. The mouse wheel scrolls.</p>
+    </section>
+
+    <section id="sessions">
+      <h2>Sessions</h2>
+      <p>Each session runs in tmux on the machine, not in your terminal window. Close the terminal, lose the
+        connection or reboot: it comes back with its conversation, and one that crashes is restarted (up to three
+        times in ten minutes).</p>
+<pre class="code"><span class="p">$</span> force new                          <span class="c"># named after your first message</span>
+<span class="p">$</span> force new api --cwd ~/src/api      <span class="c"># or name it yourself</span>
+<span class="p">$</span> force new logs --kind shell
+<span class="p">$</span> force rename api api-v2
+<span class="p">$</span> force move api-v2 ~/src/api-v2     <span class="c"># another folder, same conversation</span>
+<span class="p">$</span> force archive api-v2               <span class="c"># stop and hide; force unarchive brings it back</span>
+<span class="p">$</span> force delete api-v2 --yes          <span class="c"># for good; the agent's own transcript stays</span></pre>
+      <p>Claude Code sessions also appear in the Claude app under their Force name (Remote Control), so the name
+        is the same in Force, in Claude and on your phone.</p>
+      <h3>Bringing in sessions you already have</h3>
+      <p><code>force import</code> lists the Claude Code sessions Force doesn't manage yet: running ones in any
+        terminal and older stopped ones. <code>force import ID</code> (or a prefix of six or more characters) takes
+        one over with its conversation: a running one once it is idle, a stopped one resumed in its folder.</p>
+    </section>
+
+    <section id="machines">
+      <h2>Other machines</h2>
+      <p>Add a server you reach with ssh (key login), and its sessions are one click away from your laptop's.
+        Force installs itself there if it's missing.</p>
+<pre class="code"><span class="p">$</span> force host add devbox                 <span class="c"># ssh target defaults to the name</span>
+<span class="p">$</span> force host add gpu me@10.0.0.7
+<span class="p">$</span> force host list
+<span class="p">$</span> force host upgrade devbox
+<span class="p">$</span> force host remove gpu</pre>
+      <p>Switch with the host name at the bottom of the sidebar, <kbd>h</kbd> in the menu, or
+        <code>force --remote devbox</code>. A host that can't be reached shows as offline and reconnects by itself.
+        Session commands act on the host the terminal is showing.</p>
+    </section>
+
+    <section id="notifications">
+      <h2>Notifications</h2>
+      <p>Give Force one command and it runs it when a session needs you, finishes or stops. It runs through
+        <code>sh -c</code>, so anything works: ntfy, your own push server, a desktop notification.</p>
+<pre class="code"><span class="p">$</span> force settings set notifyCommand \
+    <span class="s">'curl -d "$FORCE_MESSAGE" ntfy.sh/my-force'</span>
+<span class="p">$</span> force settings set notifyCommand <span class="s">'notify-send Force "$FORCE_MESSAGE"'</span>
+<span class="p">$</span> force notify-test needs-you         <span class="c"># or finished, down</span></pre>
+      <p>The command gets these variables:</p>
+      <table class="ref">
+        <tbody>
+          <tr><th scope="row"><code>FORCE_MESSAGE</code></th><td>A ready-made line: the session's name and what happened, like <code>api: finished</code>.</td></tr>
+          <tr><th scope="row"><code>FORCE_EVENT</code></th><td><code>needs-you</code>, <code>finished</code> or <code>down</code>.</td></tr>
+          <tr><th scope="row"><code>FORCE_SESSION</code></th><td>The session's name.</td></tr>
+          <tr><th scope="row"><code>FORCE_KIND</code></th><td><code>claude</code>, <code>opencode</code> or <code>shell</code>.</td></tr>
+          <tr><th scope="row"><code>FORCE_HOST</code></th><td>The machine it runs on.</td></tr>
+          <tr><th scope="row"><code>FORCE_STATE</code></th><td>Its state now.</td></tr>
+          <tr><th scope="row"><code>FORCE_VIEWED</code></th><td><code>1</code> if you were looking at it, else <code>0</code>.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="scripting">
+      <h2>Scripts and agents</h2>
+      <p>Anything that runs a shell can drive Force: a script, a cron job or another agent. Use these instead of
+        <code>tmux send-keys</code>: they find the right pane and never type into an open approval dialog.</p>
+      <h3>See what is running</h3>
+<pre class="code"><span class="p">$</span> force list --json        <span class="c"># every session: name, state, kind, folder, model, limits…</span>
+<span class="p">$</span> force explain api        <span class="c"># why it shows its state, and its last screen rows</span>
+<span class="p">$</span> force read api --lines 120</pre>
+      <p>States in scripts: <code>needs-you</code>, <code>working</code>, <code>your-turn</code>, <code>idle</code>,
+        <code>stale</code>, <code>starting</code>, <code>down</code>, <code>shell</code>.</p>
+      <h3>Hand a session work</h3>
+<pre class="code"><span class="p">$</span> force prompt api <span class="s">"add a /health endpoint"</span> --wait --timeout 600
+<span class="p">$</span> git diff | force prompt api -        <span class="c"># "-" reads the prompt from stdin</span>
+<span class="p">$</span> force wait api --until your-turn
+<span class="p">$</span> force keys api enter                 <span class="c"># answer a dialog: enter esc tab up down …</span>
+<span class="p">$</span> force keys api --literal 2</pre>
+      <p><code>prompt</code> refuses a session that needs you: read its screen and answer with
+        <code>force keys</code> first. A timeout doesn't prove nothing was sent, so <code>force read</code> before
+        you retry.</p>
+      <h3>Report from a script in a shell session</h3>
+<pre class="code"><span class="p">$</span> force status working --summary <span class="s">"building the image"</span>
+<span class="p">$</span> force status needs-you --summary <span class="s">"approve the deploy?"</span>
+<span class="p">$</span> force status your-turn               <span class="c"># holds until someone looks</span>
+<span class="p">$</span> force status idle</pre>
+      <p>Without a report, a shell session shows working while a program runs and your turn when it ends.</p>
+      <h3>Let an agent run Force</h3>
+      <p><code>force skill</code> prints a short guide written for agents. Point Claude Code or OpenCode at it and
+        it can start sessions, hand them work and collect the answers.</p>
+    </section>
+
+    <section id="settings">
+      <h2>Settings</h2>
+      <p>Settings live in <code>~/.config/force/settings.json</code>, which holds only what you change.</p>
+<pre class="code"><span class="p">$</span> force settings                       <span class="c"># --all includes the advanced ones, --json</span>
+<span class="p">$</span> force settings set animations subtle
+<span class="p">$</span> force settings unset animations
+<span class="p">$</span> force settings edit</pre>
+      <table class="ref">
+        <thead><tr><th scope="col">Key</th><th scope="col">Default</th><th scope="col">What it does</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><code>notifyCommand</code></th><td>off</td><td>Runs when a session needs you, finishes or stops (<a href="#notifications">above</a>).</td></tr>
+          <tr><th scope="row"><code>animations</code></th><td><code>full</code></td><td><code>full</code>, <code>subtle</code> (no shimmer on working sessions) or <code>off</code>.</td></tr>
+          <tr><th scope="row"><code>intro</code></th><td><code>true</code></td><td>The intro when you attach.</td></tr>
+          <tr><th scope="row"><code>icons</code></th><td><code>auto</code></td><td><code>auto</code>, <code>on</code> or <code>off</code>.</td></tr>
+          <tr><th scope="row"><code>sidebarWidth</code></th><td><code>29</code></td><td>In columns.</td></tr>
+          <tr><th scope="row"><code>staleAfterHours</code></th><td><code>12</code></td><td>When an idle session turns stale.</td></tr>
+          <tr><th scope="row"><code>autoUpgradeSessions</code></th><td><code>true</code></td><td>Upgrade outdated agents by themselves…</td></tr>
+          <tr><th scope="row"><code>autoUpgradeIdleMinutes</code></th><td><code>10</code></td><td>…once idle this long and off screen.</td></tr>
+          <tr><th scope="row"><code>layout</code></th><td><code>split</code></td><td><code>split</code> or <code>classic</code>.</td></tr>
+          <tr><th scope="row"><code>opencodeManaged</code></th><td><code>false</code></td><td>Keep Force's own copy of OpenCode on the latest release.</td></tr>
+          <tr><th scope="row"><code>checkForUpdates</code></th><td><code>true</code></td><td>The daily check for a new Force.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="updates">
+      <h2>Updates and uninstall</h2>
+      <p>A daily check shows a new release in the sidebar footer. <code>force update</code> installs it
+        (<code>--check</code> only looks); your sessions keep running.</p>
+      <p><code>force uninstall</code> asks first (<code>--yes</code> answers for you). It keeps your
+        conversations, the session list and your settings; <code>--purge</code> removes everything, the icon font
+        included.</p>
+    </section>
+
+    <section id="trouble">
+      <h2>When something is off</h2>
+<pre class="code"><span class="p">$</span> force doctor --fix            <span class="c"># health check, repairs what it can</span>
+<span class="p">$</span> force explain NAME            <span class="c"># why a session shows the state it does</span>
+<span class="p">$</span> force restart NAME            <span class="c"># same conversation; --all for every session</span>
+<span class="p">$</span> journalctl --user -u force -f <span class="c"># the background service's log</span></pre>
+      <table class="ref">
+        <tbody>
+          <tr><th scope="row"><code>~/.config/force/</code></th><td>Your settings and hosts.</td></tr>
+          <tr><th scope="row"><code>~/.local/share/force/</code></th><td>Force itself, the session list, and copies of archived conversations (Claude Code deletes its transcripts after 30 days).</td></tr>
+          <tr><th scope="row"><code>~/.local/state/force/</code></th><td>Runtime state.</td></tr>
+        </tbody>
+      </table>
+      <p>Still stuck? <a href="{{repo}}/issues/new?template=bug_report.yml" data-repo>Report an issue</a> on GitHub; the
+        form asks for <code>force --version</code> and <code>force doctor</code>. Missing something?
+        <a href="{{repo}}/issues/new?template=feature_request.yml" data-repo>Suggest an idea</a>.</p>
+    </section>
+
+    <section id="reference">
+      <h2>Command reference</h2>
+<pre class="code ref-block">force                                  open the cockpit   <span class="c">--remote NAME, --no-intro</span>
+force new [NAME] [--cwd DIR] [--kind claude|opencode|shell]
+force rename OLD NEW
+force move NAME up|down|DIR
+force restart [NAME|--all]            force upgrade [NAME|--all]
+force archive NAME                    force unarchive NAME
+force delete NAME [--yes]             force list [--all] [--json]
+force import [ID] [--name NAME] [--dry-run]
+force host add NAME [SSH] | list | remove NAME | upgrade NAME
+force prompt NAME TEXT… [--wait] [--until STATE] [--timeout SEC] [--json]
+force wait NAME [--until STATE] [--timeout SEC]
+force read NAME [--lines N]           force keys NAME KEY…
+force status STATE [--summary TEXT]   force explain NAME
+force settings [set KEY VALUE | unset KEY | path | edit] [--all] [--json]
+force notify-test [needs-you|finished|down]
+force update [--check]                force uninstall [--purge] [--yes]
+force doctor [--fix]                  force fonts
+force --version                       the installed version (for bug reports)
+force skill                            the guide for agents that drive Force</pre>
+    </section>
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="foot-top">
+    <p class="foot-legal">Open source under the <a href="LICENSE.txt">MIT licence</a>: provided as is, without warranty of any kind, and used at your own risk; its author is not liable for any damage or loss from using it. An independent project, not affiliated with Anthropic or the makers of OpenCode. Claude and Claude Code are trademarks of Anthropic, PBC.</p>
+    <nav class="foot-nav" aria-label="Footer">
+      <a class="gh" href="{{repo}}" data-repo><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>
+      <a href="{{repo}}/issues/new?template=bug_report.yml" data-repo>Report an issue</a>
+      <a href="{{repo}}/issues/new?template=feature_request.yml" data-repo>Suggest an idea</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="mailto:hello@useforce.cc">hello@useforce.cc</a>
+    </nav>
+  </div>
+  <div class="foot-word" aria-hidden="true">Force</div>
+</footer>
+
+<script src="docs.js" defer></script>
+<script src="agent-tools.js" defer></script>
+</body>
+</html>

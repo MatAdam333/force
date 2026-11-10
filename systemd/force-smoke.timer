@@ -1,0 +1,11 @@
+[Unit]
+Description=Hourly check whether the Force self-test is due (force smoke --if-due)
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=1h
+RandomizedDelaySec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

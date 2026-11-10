@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Force settings",
+  "type": "object",
+  "properties": {
+    "animations": {
+      "type": "string",
+      "default": "full",
+      "description": "animate the working shimmer: full | subtle | off",
+      "enum": [
+        "full",
+        "subtle",
+        "off"
+      ]
+    },
+    "intro": {
+      "type": "boolean",
+      "default": true,
+      "description": "play the startup intro on attach (force --no-intro skips one attach)"
+    },
+    "icons": {
+      "type": "string",
+      "default": "auto",
+      "description": "icon tier: auto (by terminal) | on (Nerd Font symbols) | off",
+      "enum": [
+        "auto",
+        "on",
+        "off"
+      ]
+    },
+    "sidebarWidth": {
+      "type": "integer",
+      "default": 29,
+      "description": "sidebar width in columns"
+    },
+    "staleAfterHours": {
+      "type": "number",
+      "default": 12,
+      "description": "after how many idle hours an unseen session is stale"
+    },
+    "autoUpgradeSessions": {
+      "type": "boolean",
+      "default": true,
+      "description": "restart idle outdated agent sessions automatically"
+    },
+    "autoUpgradeIdleMinutes": {
+      "type": "number",
+      "default": 10,
+      "description": "how long an outdated session must be idle to auto-upgrade"
+    },
+    "layout": {
+      "type": "string",
+      "default": "split",
+      "description": "split (ui tmux per terminal) | classic (one tmux)",
+      "enum": [
+        "split",
+        "classic"
+      ]
+    },
+    "opencodeManaged": {
+      "type": "boolean",
+      "default": false,
+      "description": "keep Force's own OpenCode copy on the latest release"
+    },
+    "checkForUpdates": {
+      "type": "boolean",
+      "default": true,
+      "description": "check once a day whether a newer Force exists"
+    },
+    "notifyCommand": {
+      "type": "string",
+      "default": "",
+      "description": "command run when a session needs you, finishes or stops ($FORCE_MESSAGE, $FORCE_EVENT, \u2026)"
+    },
+    "notifyWhenViewed": {
+      "type": "boolean",
+      "default": false,
+      "description": "also notify about a session a terminal is showing"
+    },
+    "crashRestartMax": {
+      "type": "integer",
+      "default": 3,
+      "description": "how often a session is restarted after a crash"
+    },
+    "crashWindowMinutes": {
+      "type": "number",
+      "default": 10,
+      "description": "the crash window those restarts count in"
+    },
+    "startGraceSeconds": {
+      "type": "number",
+      "default": 30,
+      "description": "how long a session may stay down before a restart counts"
+    },
+    "richTerminals": {
+      "type": "string",
+      "default": "kitty|ghostty|wezterm",
+      "description": "terminals that get the rich icons in auto mode (a regex)"
+    },
+    "introCellAspect": {
+      "type": "number",
+      "default": 0,
+      "description": "intro cell height/width when the terminal reports no pixel size (0 = automatic)"
+    },
+    "reloadOnChange": {
+      "type": "boolean",
+      "default": true,
+      "description": "reload code and config changes without restarting the daemon"
+    },
+    "sharing": {
+      "type": "boolean",
+      "default": false,
+      "description": "session sharing with another user (parked)"
+    },
+    "$schema": {
+      "type": "string",
+      "description": "the settings schema (ignored)"
+    }
+  },
+  "additionalProperties": false
+}

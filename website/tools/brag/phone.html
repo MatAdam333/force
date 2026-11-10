@@ -1,0 +1,263 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- The phone cut of the intro film (1080 x 1378, the shape of the page's stage on phones). Same story and timeline as
+     index.html, so the page's captions fit both: seven terminals stack up, fold into Force's session list at phone
+     width, a tap opens the session that needs you, the terminal closes and the sessions keep working, Force comes back.
+     Its last frame is the page's phone view (.phone: bar + the real 46-column list), pixel for pixel. -->
+<style>
+@font-face { font-family: "Geist"; src: url("fonts/geist-latin.woff2") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "Force Mono"; src: url("fonts/dejavu-sans-mono.woff2") format("woff2"); font-weight: 400; }
+@font-face { font-family: "Force Mono"; src: url("fonts/dejavu-sans-mono-bold.woff2") format("woff2"); font-weight: 700; }
+@font-face { font-family: "Force Symbols"; src: url("fonts/nerd-symbols.woff2") format("woff2"); }
+.nf { display: inline-block; width: .6021em; font-family: "Force Symbols"; white-space: pre; vertical-align: top;
+      position: relative; z-index: 1; }
+html, body { margin: 0; background: #000; }
+#stage { position: relative; width: 1080px; height: 1378px; overflow: hidden; background: #161616;
+         font-family: "Geist", sans-serif; color: #fff; }
+.layer { position: absolute; inset: 0; opacity: 0; }
+.floor { position: absolute; inset: 0;
+  background: radial-gradient(90% 60% at 50% 0%, #2c2c2c 0%, rgba(44,44,44,0) 70%), linear-gradient(180deg, #1f1f1f, #161616); }
+/* scenes 1-2: the stack of terminals */
+.win { position: absolute; left: 0; top: 0; overflow: hidden; background: #212121; border: 1px solid rgba(255,255,255,.14);
+       border-radius: 16px; font: 400 26px/1.45 "Force Mono", monospace; color: #c8c8c8; transform-origin: 0 0; }
+.win .bar { height: 50px; background: #2a2a2a; display: flex; align-items: center; justify-content: center;
+            font: 600 23px/1 "Geist", sans-serif; color: #a8a8a8; white-space: nowrap; overflow: hidden; }
+.win pre { margin: 0; padding: 18px 24px; font: inherit; white-space: pre; }
+.win .need { position: absolute; right: 22px; top: 70px; background: #f0645e; color: #fff; border-radius: 10px;
+             font: 600 24px/1 "Geist", sans-serif; padding: 12px 16px; opacity: 0; white-space: nowrap;
+             box-shadow: 0 8px 24px rgba(240,100,94,.45); }
+.g { color: #7dd87d; } .y { color: #e5c07b; } .c { color: #d97757; } .d { color: #8a8a8a; }
+
+/* the phone window: the page's .phone at 39 px per em (46 columns across 1080 px); same rules as style.css */
+.phone { position: absolute; left: 0; top: 0; width: 1080px; height: 1378px; overflow: hidden; background: #212121;
+         font-size: calc(1080px / 27.6943); transform-origin: 50% 50%; }
+.phone-bar { display: flex; align-items: center; justify-content: space-between; gap: .6em; height: 3.1em; padding: 0 .7em;
+             background: #2a2a2a; box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .06);
+             font: 600 1.05em/1 "Geist", sans-serif; color: #e8e8e8; box-sizing: border-box; }
+.phone-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+.phone-back, .phone-pill { flex: none; font: 500 .92em/1 "Geist", sans-serif; padding: .55em .8em; border: 0; border-radius: .6em;
+                           background: #3a3a3a; color: #f2f2f2; }
+.phone-pill.need { background: rgba(240, 100, 94, .18); color: #f0645e; }
+.views { position: relative; height: calc(1378px - 3.1em); overflow: hidden; }
+.view { position: absolute; left: 0; top: 0; width: 100%; }
+.phone pre { margin: 0; font-family: "Force Mono", monospace; font-size: 1em; line-height: 1.1640625; color: #d0d0d0;
+             width: max-content; font-variant-ligatures: none; white-space: pre;
+             --lh: 1.1640625em; --cw: .60205078em; position: relative; isolation: isolate; }
+.phone pre .paint { position: absolute; left: 0; top: 0; z-index: -1; pointer-events: none; }
+.phone pre .paint i { position: absolute; display: block; background: var(--bg);
+  top: calc(var(--r) * var(--lh) + var(--ty, 0) * var(--t, 0px) - var(--et, 0px));
+  left: calc(var(--c) * var(--cw) + var(--tx, 0) * var(--t, 0px) - var(--el, 0px));
+  width: calc(var(--n) * var(--cw) + var(--tw, 0) * var(--t, 0px) + var(--el, 0px) + var(--er, 1px));
+  height: calc(var(--h) * var(--lh) + var(--th, 0) * var(--t, 0px) + var(--et, 0px) + var(--eb, 1px)); }
+.phone pre .paint i.arc { background: none; box-sizing: border-box; }
+.phone pre .bk { -webkit-text-fill-color: transparent; }
+.ring { position: absolute; border: 3px solid #f0645e; border-radius: 12px; opacity: 0; box-shadow: 0 0 28px rgba(240,100,94,.5); }
+#finger { position: absolute; left: 0; top: 0; width: 92px; height: 92px; margin: -46px 0 0 -46px; border-radius: 50%;
+          background: rgba(255,255,255,.28); box-shadow: 0 0 0 2px rgba(255,255,255,.55), 0 10px 30px rgba(0,0,0,.45); opacity: 0; }
+.ripple { position: absolute; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%;
+          border: 3px solid #f6c2a4; opacity: 0; }
+
+/* they keep working: the sessions, floating, the terminal gone */
+#keep { display: flex; justify-content: center; align-items: center; }
+.list { position: relative; width: 900px; padding: 40px 44px 36px; border-radius: 22px; background: #212121; box-sizing: border-box;
+        box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 50px 120px -10px rgba(0,0,0,.65);
+        font: 400 36px/1.25 "Force Mono", monospace; color: #c6c6c6; }
+.list .rule { display: flex; align-items: center; gap: 22px; color: #9a9a9a; letter-spacing: .32em; margin: 0 0 30px; }
+.list .rule::before, .list .rule::after { content: ""; flex: 1; height: 1px; background: #3c3c3c; }
+.list .rule.low { letter-spacing: .02em; margin: 30px 0 0; color: #c6c6c6; font-size: 30px; }
+.list .rule .bolt { color: #d97757; letter-spacing: 0; margin-right: .3em; }
+.row { display: flex; align-items: center; height: 78px; position: relative; }
+.row .edge { width: 7px; align-self: stretch; margin: 10px 26px 10px 0; background: #4e4e4e; }
+.row .ic { width: 1.2em; text-align: center; margin-right: .7em; }
+.row .nm { flex: 1; color: #e2e2e2; }
+.row .st { position: relative; text-align: right; min-width: 8.5em; height: 1.25em; font-size: 30px; }
+.row .st b { position: absolute; right: 0; top: 0; font-weight: 400; white-space: nowrap; }
+#black { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; }
+</style></head>
+<body><div id="stage">
+  <div id="pileL" class="layer"><div class="floor"></div><div id="pile"></div></div>
+  <div id="phoneL" class="layer"><div class="floor"></div>
+    <div class="phone" id="phone">
+      <div class="phone-bar"><span class="phone-back" id="back" style="display:none">&#8249; Sessions</span>
+        <b class="phone-title" id="title">Force</b><span class="phone-pill" id="pill">Tap a session</span></div>
+      <div class="views"><div class="view" id="vList"><pre id="preL"></pre></div>
+        <div class="view" id="vBill" style="opacity:0"><pre id="preB"></pre></div></div>
+    </div>
+    <div class="ring" id="ring"></div>
+    <div class="ripple" id="ripple"></div>
+    <div id="finger"></div>
+  </div>
+  <div id="keep" class="layer"><div class="floor"></div><div class="list" id="list"></div></div>
+  <div id="black"></div>
+</div>
+<script>
+// each window is the session of the same name in the list; window i lands on list rows 3+2i .. 4+2i
+const W = [
+  ["shell", 70, 70, -2, ['<span class="d">~$</span> ls', 'api  billing-fix  docs-site', '<span class="d">~$</span> uptime']],
+  ["api", 520, 150, 2, ['<span class="g">●</span> Update(server.py)', '  └ Added 2 lines', '<span class="g">●</span> /health returns ok']],
+  ["billing-fix", 120, 360, -1, ['<span class="g">●</span> Read 2 files', '<span class="y">✻</span> VAT rounding…', '', '<span class="c">Do you want to make</span>', '<span class="c">this edit?</span>']],
+  ["docs-site", 560, 470, 3, ['<span class="g">●</span> Fixed 4 broken links', '', '<span class="g">✓</span> done · your turn']],
+  ["infra", 60, 760, 1, ['<span class="g">●</span> Update(main.tf)', '  security group only', '<span class="d">  2 fixes</span>']],
+  ["mobile", 500, 830, -3, ['<span class="y">✻</span> Running the tests…', '<span class="d">  ⎿ 36 passed</span>', '<span class="y">✻</span> still running']],
+  ["migration-2024", 140, 1040, 2, ['<span class="d">(30 hours ago)</span>', '<span class="g">●</span> Row count unchanged', '<span class="d">  waiting since then</span>']],
+];
+const WIN_W = 470, WIN_H = 270;
+const CARD_BG = ["#212121", "#212121", "#212121", "#212121", "#212121", "#212121", "#212121"];
+const pile = document.getElementById("pile");
+const wins = W.map(([name, x, y, rot, lines]) => {
+  const d = document.createElement("div");
+  d.className = "win";
+  d.innerHTML = `<div class="bar"><b>${name}</b></div><pre>${lines.join("\n")}</pre>` +
+                (name === "billing-fix" ? '<div class="need">! needs you</div>' : "");
+  pile.appendChild(d);
+  return d;
+});
+const order = [0, 2, 1, 4, 5, 3, 6];        // stacking: billing-fix lies buried
+order.forEach((wi, z) => wins[wi].style.zIndex = z + 1);
+
+async function load(id, url) { document.getElementById(id).innerHTML = await (await fetch(url)).text(); }
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lin = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+const ease = p => 1 - Math.pow(1 - p, 3);
+const easeQ = p => 1 - Math.pow(1 - p, 5);
+const inout = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const mix = (a, b, k) => a + (b - a) * k;
+const hexv = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+const mixc = (a, b, k) => { const x = hexv(a), y = hexv(b); return `rgb(${x.map((v, i) => Math.round(mix(v, y[i], k))).join(",")})`; };
+const show = (id, o) => document.getElementById(id).style.opacity = o;
+
+const FS = 1080 / 27.6943, CW = FS * .60205078, CH = FS * 1.1640625, BAR = 3.1 * FS;
+const SPIN = [...Array(8)].map((_, i) => String.fromCodePoint(0xF0A9E + i));
+let spinEls = null;
+
+// they keep working
+const STATE = {
+  shell: ["", "#c6c6c6", "shell ~"], idle: ["", "#c6c6c6", "idle"], stale: ["", "#8a8a8a", "stale"],
+  turn: ["", "#87c08f", "your turn"], work: [null, "#d7af5f", ""], need: ["", "#f0645e", "needs permission"],
+};
+const KEEP = [
+  { name: "shell", from: "shell" },
+  { name: "api", from: "idle" },
+  { name: "billing-fix", from: "work", to: "need", at: 14.55, a: "updating tests" },
+  { name: "docs-site", from: "work", to: "turn", at: 13.75, a: "checking links" },
+  { name: "infra", from: "idle" },
+  { name: "mobile", from: "work", a: "running a command" },
+  { name: "migration-2024", from: "stale" },
+];
+const icon = (st, t) => st === "work" ? SPIN[Math.floor(t * 8) % 8] : STATE[st][0];
+const list = document.getElementById("list");
+list.innerHTML = '<div class="rule"><span><span class="bolt nf"></span> FORCE</span></div>';
+const rowEls = KEEP.map(k => {
+  const el = document.createElement("div"); el.className = "row";
+  const words = st => st === "work" ? null : STATE[st][2];
+  const ta = k.a || words(k.from), tb = k.b || (k.to ? words(k.to) : "");
+  el.innerHTML = `<i class="edge"></i><span class="ic nf"></span><span class="nm">${k.name}</span>` +
+    `<span class="st"><b class="a" style="color:${STATE[k.from][1]}">${ta}</b><b class="b" style="color:${STATE[k.to || k.from][1]}">${tb}</b></span>`;
+  list.appendChild(el);
+  return { el, edge: el.querySelector(".edge"), ic: el.querySelector(".ic"), a: el.querySelector(".a"), b: el.querySelector(".b") };
+});
+list.insertAdjacentHTML("beforeend", '<div class="rule low"><span><span class="nf" style="color:#d97757"></span>&nbsp; devbox · terminal closed</span></div>');
+
+function render(t) {
+  // --- scenes 1-2: the stack; then each window folds into its own row of the list ----------------------------
+  show("pileL", t < 5.9 ? 1 : 0);
+  const S = t < 4.6 ? 1 + .03 * ease(lin(t, 0, 4.6)) : 1 + .03 * (1 - inout(lin(t, 4.6, 5.0)));
+  pile.style.transform = `scale(${S})`; pile.style.transformOrigin = "50% 45%";
+  wins.forEach((w, i) => {
+    const z = order.indexOf(i);
+    const p = easeQ(lin(t, .15 + z * .27, .15 + z * .27 + .5));
+    const m = inout(lin(t, 5.0 + i * .06, 5.0 + i * .06 + .8));
+    const jit = t > 2.7 && t < 5 ? Math.sin(t * 11 + i * 2.1) * 1.6 : 0;
+    const cx = CW, cy = BAR + (3 + 2 * i) * CH, cw = 45 * CW, ch = 2 * CH;
+    const x0 = W[i][1] + jit, y0 = W[i][2] - 60 * (1 - p);
+    w.style.left = `${mix(x0, cx, m)}px`;
+    w.style.top = `${mix(y0, cy, m)}px`;
+    w.style.width = `${mix(WIN_W, cw, m)}px`;
+    w.style.height = `${mix(WIN_H, ch, m)}px`;
+    w.style.transform = `rotate(${W[i][3] * (1 - m)}deg) scale(${.96 + .04 * p})`;
+    w.style.opacity = p * (1 - lin(t, 5.05, 5.4));
+    w.style.background = mixc("#1b1b1b", CARD_BG[i], m);
+    w.style.borderColor = `rgba(58,58,58,${1 - m})`;
+    w.style.boxShadow = `0 ${30 * (1 - m)}px ${70 * (1 - m)}px rgba(0,0,0,${.5 * (1 - m)})`;
+    const bar = w.querySelector(".bar");
+    bar.style.height = `${50 * (1 - lin(m, 0, .6))}px`;
+    bar.style.opacity = 1 - lin(m, 0, .5);
+    w.querySelector("pre").style.opacity = 1 - lin(m, 0, .45);
+    const need = w.querySelector(".need");
+    if (need) need.style.opacity = m > 0 ? 0 : (t > 3.0 && t < 5.0 ? (Math.sin((t - 3.0) * Math.PI * 2.4) > -0.2 ? 1 : 0.15) : 0);
+  });
+
+  // --- the phone window: the list, a tap on billing-fix, its screen slides in; it closes at 12 s ---------------
+  const inA = inout(lin(t, 5.05, 5.55));
+  const cout = inout(lin(t, 11.95, 12.6));             // closes
+  const open = inout(lin(t, 15.8, 16.6));              // comes back
+  const phoneOn = t < 12.7 ? inA * (1 - cout) : lin(t, 15.8, 16.3);
+  show("phoneL", t < 12.7 ? inA : (t >= 15.8 ? 1 : 0));
+  const ph = document.getElementById("phone");
+  const sc = t < 12.7 ? 1 - .05 * cout : .955 + .045 * open;
+  ph.style.transform = `scale(${sc})`;
+  const bl = t < 12.7 ? cout * 14 : (1 - open) * 8;
+  ph.style.filter = bl > .01 ? `blur(${bl}px)` : "none";
+  ph.style.opacity = phoneOn;
+  document.querySelector("#phoneL .floor").style.opacity = t < 12.7 ? 1 : lin(t, 16.1, 16.5);
+  // the session that needs you: its row pulses, a finger taps it, its screen slides in (8.3 .. 11.9)
+  const nav = t < 12.7 ? inout(lin(t, 9.45, 9.85)) : 0;
+  const vL = document.getElementById("vList"), vB = document.getElementById("vBill");
+  vL.style.transform = `translateX(${-30 * nav}%)`; vL.style.opacity = 1 - nav;
+  vB.style.transform = `translateX(${100 * (1 - nav)}%)`; vB.style.opacity = nav > 0 ? 1 : 0;
+  const onBill = nav > .5;
+  document.getElementById("back").style.display = onBill ? "" : "none";
+  document.getElementById("title").textContent = onBill ? "billing-fix" : "Force";
+  document.getElementById("pill").style.visibility = onBill ? "hidden" : "visible";
+  const ry = BAR + 7 * CH, rx = CW * .5;
+  const ring = document.getElementById("ring");
+  ring.style.opacity = t > 8.3 && t < 9.5 ? (0.65 + 0.35 * Math.sin((t - 8.3) * 9)) * lin(t, 8.3, 8.45) : 0;
+  const pad = 6 + 3 * Math.sin((t - 8.3) * 9);
+  Object.assign(ring.style, { left: `${rx - pad}px`, top: `${ry - pad}px`, width: `${45 * CW + 2 * pad}px`, height: `${2 * CH + 2 * pad}px` });
+  const fg = document.getElementById("finger");
+  const gl = inout(lin(t, 8.5, 9.2));
+  const tx = 540, ty = ry + CH;
+  fg.style.opacity = lin(t, 8.45, 8.65) * (1 - lin(t, 9.45, 9.7));
+  fg.style.left = `${mix(820, tx, gl)}px`; fg.style.top = `${mix(1180, ty, gl)}px`;
+  fg.style.transform = `scale(${t > 9.22 && t < 9.4 ? .82 : 1})`;
+  const rp = lin(t, 9.25, 9.75), rip = document.getElementById("ripple");
+  rip.style.left = `${tx}px`; rip.style.top = `${ty}px`;
+  rip.style.opacity = rp > 0 && rp < 1 ? (1 - rp) * .9 : 0;
+  rip.style.transform = `scale(${1 + rp * 6})`;
+  if (!spinEls) spinEls = [...document.querySelectorAll("#preL .nf, #preB .nf")].filter(s => SPIN.includes(s.textContent));
+  spinEls.forEach(s => s.textContent = SPIN[Math.floor(t * 8) % 8]);
+
+  // --- they keep working: the terminal is gone, the sessions carry on ------------------------------------------
+  const kin = ease(lin(t, 12.45, 13.1));
+  show("keep", kin * (1 - lin(t, 15.8, 16.3)));   // its floor would cover the window coming back
+  const leave = inout(lin(t, 15.7, 16.3));
+  const L = document.getElementById("list");
+  L.style.transform = `translateY(${(1 - kin) * 22}px) scale(${(1 + .02 * lin(t, 12.45, 15.7)) * (1 + .12 * leave)})`;
+  L.style.opacity = 1 - leave;
+  L.style.filter = leave > .005 ? `blur(${leave * 10}px)` : "none";
+  KEEP.forEach((k, i) => {
+    const row = rowEls[i];
+    const r = ease(lin(t, 12.6 + i * .07, 13.2 + i * .07));
+    const sw = k.at ? inout(lin(t, k.at, k.at + .45)) : 0;
+    const [c0, c1] = [STATE[k.from][1], STATE[k.to || k.from][1]];
+    row.edge.style.background = mixc(c0 === "#c6c6c6" ? "#4e4e4e" : c0, c1 === "#c6c6c6" ? "#4e4e4e" : c1, sw);
+    row.ic.textContent = sw < .5 ? icon(k.from, t) : icon(k.to, t);
+    row.ic.style.color = mixc(c0, c1, sw);
+    const so = lin(sw, 0, .5), si = lin(sw, .5, 1);
+    row.a.style.opacity = 1 - so; row.a.style.transform = `translateY(${-14 * so}px)`;
+    row.b.style.opacity = si; row.b.style.transform = `translateY(${14 * (1 - si)}px)`;
+    row.el.style.transform = `translateX(${(1 - r) * -14}px)`;
+    row.el.style.opacity = r;
+  });
+}
+
+window.ready = (async () => {
+  await load("preL", "phone-list.html");
+  await load("preB", "phone-billing-fix.html");
+  await document.fonts.ready;
+  render(0);
+  return true;
+})();
+window.render = render;
+</script>
+</body></html>

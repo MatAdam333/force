@@ -1,0 +1,13 @@
+[Unit]
+Description=Force tmux server (hosts the agent sessions)
+Documentation=file://%h/.local/share/force/app/SPEC.md
+
+[Service]
+Type=simple
+Environment=PATH=%h/.local/share/force/app/share/tmux-bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/bin/sh -c 'exec tmux -L force -f "$HOME/.local/share/force/app/share/tmux.conf" -D'
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
