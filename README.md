@@ -12,7 +12,7 @@
 
 <p align="center">
   <b>Every coding agent you run, in one terminal.</b><br>
-  Force keeps your agent sessions running on your machine or a server, through closed terminals and reboots,<br>
+  Force keeps your agent sessions running on your machine or a server, through closed terminals and reboots,
   and tells you which one needs you, on your phone too.
 </p>
 
