@@ -846,7 +846,7 @@ impl Dialog {
         let mut kind = self.warn_kind;
         if text.is_empty() && !self.forced && self.busy {
             kind = StatusKind::Warning;
-            text = format!("{}{}{} is working right now", crate::glyphs::state(self.tier, '⚠', '\u{F071}'), crate::glyphs::gap(self.tier), self.name.clone().unwrap_or_default());
+            text = format!("{}{}{} is working right now", crate::glyphs::state(self.tier, '!', '\u{F071}'), crate::glyphs::gap(self.tier), self.name.clone().unwrap_or_default());
         }
         if text.is_empty() {
             return;
@@ -1321,7 +1321,7 @@ impl Dialog {
         }
         if !self.forced && self.busy {
             self.warn_kind = StatusKind::Warning;
-            self.warn_text = format!("{}{}busy — press f to force", crate::glyphs::state(self.tier, '⚠', '\u{F071}'), crate::glyphs::gap(self.tier));
+            self.warn_text = format!("{}{}busy — press f to force", crate::glyphs::state(self.tier, '!', '\u{F071}'), crate::glyphs::gap(self.tier));
             return;
         }
         let name = self.name.clone().unwrap_or_default();
@@ -1335,7 +1335,7 @@ impl Dialog {
         match self.runner.cockpit(&argv) {
             Err(e) => {
                 self.warn_kind = StatusKind::Warning;
-                self.warn_text = format!("⚠ {}", e);
+                self.warn_text = format!("{} {}", crate::glyphs::state(self.tier, '!', '⚠'), e);
             }
             Ok(_) => self.finish(0),
         }
@@ -1734,7 +1734,7 @@ fn scroll_top(cursor: usize, visible: usize, len: usize) -> usize {
 
 fn status_parts(tier: Tier, kind: StatusKind) -> (Option<char>, Color) {
     match kind {
-        StatusKind::Error => (Some(crate::glyphs::state(tier, '✗', '\u{F057}')), ERROR),
+        StatusKind::Error => (Some(crate::glyphs::state(tier, '×', '\u{F057}')), ERROR),
         StatusKind::Ok => (Some(crate::glyphs::state(tier, '✓', '\u{F058}')), SUCCESS),
         StatusKind::Warning => (None, WARNING),
         StatusKind::Neutral => (None, FG_DIM),
@@ -1930,7 +1930,7 @@ mod tests {
         assert_eq!(title(Tier::Rich, "Archived", '\u{F187}'), "\u{F187}  Archived");
         assert_eq!(title(Tier::Rich, "Delete", '\u{F1F8}'), "\u{F1F8}  Delete");
         assert_eq!(title(Tier::Rich, "Jump", '\u{F002}'), "\u{F002}  Jump");
-        // status ✓/✗ swap to font icons in RICH
+        // status ✓/× swap to font icons in RICH
         assert_eq!(status_parts(Tier::Plain, StatusKind::Ok).0, Some('✓'));
         assert_eq!(status_parts(Tier::Rich, StatusKind::Ok).0, Some('\u{F058}'));
         assert_eq!(status_parts(Tier::Rich, StatusKind::Error).0, Some('\u{F057}'));

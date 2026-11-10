@@ -44,14 +44,6 @@ case "${1:-}" in
   *) usage >&2; exit 2 ;;
 esac
 
-# WSL: the terminal is a Windows program drawing with Windows' fonts; a font installed here never reaches it
-if [ "$UNINSTALL" = 0 ] && { [ -n "${WSL_DISTRO_NAME:-}${WSL_INTEROP:-}" ] || [ -e /proc/sys/fs/binfmt_misc/WSLInterop ] \
-     || grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null; }; then
-  say "On WSL, Windows Terminal draws Force with Windows fonts: install \"$SYMBOL_FAMILY\" in Windows (from"
-  say "https://github.com/ryanoasis/nerd-fonts/releases), add it to your Windows Terminal profile's font, then run:"
-  say "force settings set icons on"
-  exit 0
-fi
 
 # dconf/gsettings need the session bus. Use the well-known runtime socket when DBUS_SESSION_BUS_ADDRESS is unset;
 # without any bus, skip those steps (a silent no-op).
@@ -178,7 +170,90 @@ install_font() {
   say "fonts: installed the Nerd Font symbols (icons)"
 }
 
+# --- WSL: the terminal is a Windows program that draws with Windows' fonts ---------------------------------
+# A Linux font never reaches it. Instead: the symbols font goes into Windows for this user (no admin), and a
+# Windows Terminal fragment adds a "Force (<distro>)" profile whose font is Cascadia Mono with the symbols as
+# fallback and which starts Force with icons. The user's own profiles and settings are not touched.
+is_wsl() {
+  [ -n "${WSL_DISTRO_NAME:-}${WSL_INTEROP:-}" ] || [ -e /proc/sys/fs/binfmt_misc/WSLInterop ] \
+    || grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null
+}
+wsl_hint() {
+  say "Windows Terminal: for Force's icons, install \"$SYMBOL_FAMILY\" in Windows (from"
+  say "https://github.com/ryanoasis/nerd-fonts/releases), add it to your profile's font, then: force settings set icons on"
+}
+win_exe() {  # win_exe NAME: a Windows program through WSL interop (PATH, else the usual System32)
+  command -v "$1" 2>/dev/null || { [ -x "/mnt/c/Windows/System32/$1" ] && echo "/mnt/c/Windows/System32/$1"; }
+}
+win_localappdata() {  # %LOCALAPPDATA% as a Windows path (run from a Windows folder: cmd.exe refuses a UNC cwd)
+  local cmd; cmd=$(win_exe cmd.exe) || return 1
+  (cd /mnt/c 2>/dev/null || cd /; "$cmd" /c "echo %LOCALAPPDATA%" 2>/dev/null) | tr -d '\r' | tail -n 1
+}
+json_str() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'; }
+WIN_FONT=SymbolsNerdFontMono-Regular.ttf
+WIN_FONT_VALUE="$SYMBOL_FAMILY (TrueType)"
+WIN_FONTS_KEY='HKCU\Software\Microsoft\Windows NT\CurrentVersion\Fonts'
+windows_terminal() {
+  local lad_win lad reg distro fonts frag force_bin tmp
+  distro="${WSL_DISTRO_NAME:-}"
+  [ -n "$distro" ] && have wslpath || return 1
+  lad_win=$(win_localappdata) || return 1
+  case "$lad_win" in ""|*%*) return 1 ;; esac
+  lad=$(wslpath -u "$lad_win") || return 1
+  reg=$(win_exe reg.exe) || return 1
+  # 1. the symbols font, installed for this Windows user
+  fonts="$lad/Microsoft/Windows/Fonts"
+  mkdir -p "$fonts" || return 1
+  if [ ! -f "$fonts/$WIN_FONT" ]; then
+    say "fonts: installing the Nerd Font symbols in Windows (for this user)"
+    tmp=$(mktemp -d)
+    fetch "$NF_URL" "$NF_SHA" "$tmp/nf.tar.xz"
+    tar -xJf "$tmp/nf.tar.xz" -C "$tmp" "$WIN_FONT" || { rm -rf "$tmp"; return 1; }
+    cp "$tmp/$WIN_FONT" "$fonts/$WIN_FONT" || { rm -rf "$tmp"; return 1; }
+    rm -rf "$tmp"
+  fi
+  (cd /mnt/c 2>/dev/null || cd /; "$reg" add "$WIN_FONTS_KEY" /v "$WIN_FONT_VALUE" /t REG_SZ \
+      /d "$lad_win\\Microsoft\\Windows\\Fonts\\$WIN_FONT" /f) >/dev/null 2>&1 || return 1
+  # 2. the "Force" profile, as a Windows Terminal fragment
+  frag="$lad/Microsoft/Windows Terminal/Fragments/Force"
+  mkdir -p "$frag" || return 1
+  force_bin="$HOME/.local/bin/force"
+  cat > "$frag/force-$distro.json" <<JSON || return 1
+{
+  "profiles": [
+    {
+      "name": "Force ($(json_str "$distro"))",
+      "commandline": "wsl.exe -d $(json_str "$distro") --cd ~ -- bash -lc 'exec $(json_str "$force_bin") --glyphs rich'",
+      "icon": "⚡",
+      "font": { "face": "Cascadia Mono, $SYMBOL_FAMILY" }
+    }
+  ]
+}
+JSON
+  say "Windows Terminal: restart it once, then open \"Force ($distro)\" from its new-tab menu for Force with icons"
+}
+windows_uninstall() {  # the fragment and, when no other distro's Force profile is left, the font too
+  local lad_win lad reg frag
+  lad_win=$(win_localappdata) || return 0
+  case "$lad_win" in ""|*%*) return 0 ;; esac
+  lad=$(wslpath -u "$lad_win" 2>/dev/null) || return 0
+  frag="$lad/Microsoft/Windows Terminal/Fragments/Force"
+  rm -f "$frag/force-${WSL_DISTRO_NAME:-}.json"
+  rmdir "$frag" 2>/dev/null || return 0                 # another distro still has its profile: keep the font
+  rm -f "$lad/Microsoft/Windows/Fonts/$WIN_FONT" 2>/dev/null || true
+  reg=$(win_exe reg.exe) || return 0
+  (cd /mnt/c 2>/dev/null || cd /; "$reg" delete "$WIN_FONTS_KEY" /v "$WIN_FONT_VALUE" /f) >/dev/null 2>&1 || true
+}
+
 # --- main -----------------------------------------------------------------------------------------------
+if is_wsl && [ "$CLEANUP_ONLY" = 0 ]; then
+  if [ "$UNINSTALL" = 1 ]; then
+    windows_uninstall
+  elif ! windows_terminal; then
+    wsl_hint
+    exit 3                                     # setup reports it; the plain symbols still work everywhere
+  fi
+fi
 if [ "$CLEANUP_ONLY" = 1 ]; then
   cleanup
   exit 0
@@ -189,5 +264,5 @@ if [ "$UNINSTALL" = 1 ]; then
   have fc-cache && fc-cache -f "$(dirname "$FONTS")" >/dev/null 2>&1 || true
   exit 0
 fi
-install_font
+is_wsl || install_font                       # on WSL a Linux font would never reach the terminal
 cleanup

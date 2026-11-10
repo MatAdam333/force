@@ -1,7 +1,7 @@
 //! The 2-row header pane. Row 0 is blank; row 1 is a rule ` ── … ── ` over the agent pane with its labels set into
 //! it: ` ≡ ` (the sidebar toggle), then the session on screen with its agent (✻ claude / ▣ opencode), model, effort
 //! and permission mode; right-aligned the attention items for other live sessions (NEEDS_YOU then YOUR_TURN, in
-//! index order; host markers first), `+N more`, the working count, ` ? ` (controls) and ` ✕ ` (quit), each
+//! index order; host markers first), `+N more`, the working count, ` ? ` (controls) and ` × ` (quit), each
 //! separated by `─`. Snapshot polling, staleness, own-session lookup and `viewed` mirror the sidebar. Rendering is
 //! a pure data structure (cells + click ranges), so it is unit-testable.
 
@@ -849,7 +849,7 @@ impl Header {
     /// Build the full header (both rows and click ranges) from the current state.
     /// The "panels" header: row 0 is blank, row 1 is a rule ` ── … ── ` over the agent pane with the
     /// labels set into it: ` ≡ ` (sidebar), the session on screen and its model on the left; the attention items,
-    /// the working count, ` ? ` (controls) and ` ✕ ` (quit) on the right, separated by `─`.
+    /// the working count, ` ? ` (controls) and ` × ` (quit) on the right, separated by `─`.
     pub fn build_layout(&self) -> Layout {
         let w = self.w;
         let row0 = vec![blank(BG); w];
@@ -888,8 +888,8 @@ impl Header {
         }
 
         let snap = self.snapshot.as_ref().expect("valid snapshot");
-        // right block, laid out right to left: ✕, ?, working count
-        let quit = format!(" {}{}", glyphs::state(tier, '✕', '\u{F011}'), glyphs::gap(tier));
+        // right block, laid out right to left: ×, ?, working count
+        let quit = format!(" {}{}", glyphs::state(tier, '×', '\u{F011}'), glyphs::gap(tier));
         let ctrl = format!(" {}{}", glyphs::state(tier, '?', '\u{F11C}'), glyphs::gap(tier));
         let n = working_count(snap);
         let working = if n == 0 {
@@ -930,13 +930,13 @@ impl Header {
             .take(kept)
             .map(|p| {
                 let lead = if p.host.is_some() {
-                    glyphs::state(tier, '⇄', '\u{EB3A}')
+                    glyphs::state(tier, '↔', '\u{EB3A}')
                 } else if p.state == State::NeedsYou {
                     glyphs::state(tier, '!', '\u{F0F3}')
                 } else {
                     glyphs::state(tier, '●', '\u{F058}')
                 };
-                // a host marker says how many sessions there want you: ` ⇄ buildbox 2 need you `
+                // a host marker says how many sessions there want you: ` ↔ buildbox 2 need you `
                 let label = if p.host.is_some() { format!(" {}", p.label) } else { String::new() };
                 let body = match p.count {
                     Some(n) => n.to_string(),
@@ -1475,7 +1475,7 @@ mod tests {
         for (icon, what) in [('\u{F0F3}', "needs-you"), ('\u{F058}', "your-turn"), ('\u{EBF3}', "sidebar"), ('\u{F11C}', "controls"), ('\u{F011}', "quit")] {
             assert!(t.contains(icon), "{what} icon: {:?}", t);
         }
-        assert!(!t.contains('!') && !t.contains('●') && !t.contains('≡') && !t.contains('✕'), "no plain glyphs: {:?}", t);
+        assert!(!t.contains('!') && !t.contains('●') && !t.contains('≡') && !t.contains('×'), "no plain glyphs: {:?}", t);
     }
 
     #[test]
@@ -1504,8 +1504,8 @@ mod tests {
             let snap = snap(vec![sess("me", 0, State::Working, true, None, false), sess("w2", 1, State::Working, true, None, false)]);
             let layout = header_with(Some(snap), Some("me"), w).build_layout();
             let r = &layout.row1;
-            let quit = find_text(r, " ✕ ");
-            assert_eq!(quit, w - 5, "` ✕ ` then `─` and the blank end column");
+            let quit = find_text(r, " × ");
+            assert_eq!(quit, w - 5, "` × ` then `─` and the blank end column");
             let ctl = find_text(r, " ? ");
             assert_eq!(ctl, quit - 4, "` ? ` one `─` before quit");
             let wk = find_text(r, "working");
@@ -1517,7 +1517,7 @@ mod tests {
         }
         let t = rule_text(&header_with(Some(snap(vec![sess("me", 0, State::Idle, true, None, false)])), Some("me"), 80));
         assert!(!t.contains("working"), "no working count at 0: {:?}", t);
-        assert!(t.contains(" ? ") && t.contains(" ✕ "));
+        assert!(t.contains(" ? ") && t.contains(" × "));
     }
 
     #[test]
@@ -1828,7 +1828,7 @@ mod tests {
         let layout = h.build_layout();
         let r1: String = layout.row1.iter().map(|c| c.ch).collect();
         // the marker names the host and how many sessions there want you (needs=2)
-        assert!(r1.contains(" ⇄ buildbox 2 need you "), "marker on the rule: {:?}", r1);
+        assert!(r1.contains(" ↔ buildbox 2 need you "), "marker on the rule: {:?}", r1);
         // marker click switches host, and it comes before the session's item
         let host_click = layout.clicks.iter().find(|c| c.action == Action::Host("buildbox".into())).expect("host click");
         let sess_click = layout.clicks.iter().find(|c| c.action == Action::Switch("sess1".into())).expect("session click");
@@ -1864,7 +1864,7 @@ mod tests {
         h.set_hosts(Some(dir.clone()), "", "");
         h.poll(NOW);
         let r1: String = h.build_layout().row1.iter().map(|c| c.ch).collect();
-        assert!(r1.contains(" ⇄ bob 1 finished "), "row 1: {:?}", r1);
+        assert!(r1.contains(" ↔ bob 1 finished "), "row 1: {:?}", r1);
         let _ = std::fs::remove_dir_all(&dir);
     }
 

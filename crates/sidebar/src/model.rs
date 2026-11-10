@@ -264,7 +264,7 @@ pub fn glyph(tier: Tier, s: State, now_ms: i64) -> char {
                 char::from_u32(0xF0A9E + i).unwrap_or('\u{F0A9E}')
             }
         },
-        State::Down => glyphs::state(tier, '✖', '\u{F057}'),
+        State::Down => glyphs::state(tier, '×', '\u{F057}'),
         State::Shell => glyphs::state(tier, '$', '\u{EA85}'),
         State::Starting => glyphs::state(tier, '…', '\u{F110}'),
         State::NeedsYou => glyphs::state(tier, '!', '\u{F0F3}'),
@@ -882,7 +882,7 @@ mod tests {
     #[test]
     fn glyph_per_state() {
         for (st, expected) in [
-            (State::Down, '✖'),
+            (State::Down, '×'),
             (State::Shell, '$'),
             (State::Starting, '…'),
             (State::NeedsYou, '!'),

@@ -131,7 +131,7 @@ pane start time, pane dead status), Claude status file (or none), `last_seen_ms`
 | state | glyph | colour | rule |
 |---|---|---|---|
 | ARCHIVED | – | dim | `archived` |
-| DOWN | `✖` | red | no tmux session, or agent pane dead, or no live status file and pane older than `start_grace_seconds` |
+| DOWN | `✖` (`×` in the plain tier) | red | no tmux session, or agent pane dead, or no live status file and pane older than `start_grace_seconds` |
 | STARTING | `…` | dim | pane alive, no live status file yet, pane younger than grace |
 | NEEDS_YOU | `●` | bold red | status `waiting` |
 | WORKING | spinner `⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏` (frame = `now_ms // 100 % 10`) | yellow | status `busy` |
@@ -401,7 +401,7 @@ guarded by tests/test_dev_tree.py).
   session you are in (bold name · folder with `~` · `v<version>`, cyan `↑` when outdated). Right =
   *attention chips* only: other live sessions in NEEDS_YOU (wine `bg=#5a2a2a`) then YOUR_TURN (moss
   `bg=#2c4232`), each 2 rows (`● name` / `needs you|finished`) with the session's click range on both
-  rows; then `⠋ N working` (`#d7af5f`); then an always-present 2-row `✕ quit` button (range
+  rows; then `⠋ N working` (`#d7af5f`); then an always-present 2-row `× quit` button (range
   `__quit__`). Width fitting: chip names 14 → 10, then `+N more`, then shorten the folder, then drop
   the version. The sidebar is the full list; the header never repeats it.
 - **Theme**: one palette for header, sidebar, dialogs, toasts and popups: greys of
@@ -409,9 +409,9 @@ guarded by tests/test_dev_tree.py).
   no blue.
 - **Sidebar**: a coral `▌` marker column on the current session's rows (text, not a CSS border);
   no keyboard cursor; no scrollbar; `     archived (n)` and `   + new session` aligned with the names.
-- **Dialogs**: padded frame, sentence-case title, labelled fields, coloured status row (✗ / ✓), a
+- **Dialogs**: padded frame, sentence-case title, labelled fields, coloured status row (× / ✓), a
   docked key-hint footer.
-- **Quit**: menu `q` or a click on `✕ quit` detach this terminal only; every session
+- **Quit**: menu `q` or a click on `× quit` detach this terminal only; every session
   keeps running.
 - **Several terminals**: each attached terminal has its own current session. `force attach` opens on
   the most recently seen session that no other terminal shows; sidebar clicks and popups act on the
@@ -422,7 +422,7 @@ guarded by tests/test_dev_tree.py).
 
 - **Layout** per session window: `[sidebar, full height, 29 cols] | [header pane, 2 rows / agent]`.
   The tmux status line is off. The header pane runs `force header` (force/headerbar.py; layout from
-  `header.layout()`): left `≡ sidebar`; right attention chips, `+N more`, `⠋ N working`, `✕ quit`.
+  `header.layout()`): left `≡ sidebar`; right attention chips, `+N more`, `⠋ N working`, `× quit`.
   Clicks act on the most recently active terminal of the pane's session. Panes have
   `@force_role` sidebar | header | agent; the daemon keeps one of each (ensure_*, dedupe keeps the
   oldest, respawns dead sidebar/header panes, logs every pane it adds).
@@ -590,6 +590,9 @@ mode: host and ui tmux servers), §40 (remote hosts) and §41 (a local Force on 
   threshold colour, `╸` for a half cell, `━` dim for the track, like Python Rich), which every modern
   terminal draws itself, seamless and without a font. PLAIN uses the same line bar (box drawing needs no Nerd
   Font). Every RICH glyph is one column wide, so layouts are identical.
+- PLAIN draws only characters that Windows Terminal's default font (Cascadia Mono) has and that are not emoji
+  (× ! ↔ ● ○ ✓ …): elsewhere Windows substitutes a colour emoji twice as wide, which breaks the layout.
+  RICH keeps its own glyphs.
 - auto: `share/tier.sh` (run by switched.sh on attach and every switch, for the shown and the left
   session, and by the `client-detached` hook) classifies every client showing the session from
   `#{client_termname} #{client_termtype}`: `rich` only if all match the config's `rich_terminals` (an
@@ -778,7 +781,7 @@ daemon on a separate tmux server (`forcetest-smoke-<pid>`) with its own registry
   `FORCE_SMOKE_FORCE` points the panes at another `force` (development).
 - Result: `<state>/smoke/last.json` (+ `history.jsonl`, logs in `log/`, 30 kept); `force smoke --last` prints it.
   The daemon puts `{"ok", "at"}` (plus `reason` when it failed) into the snapshot (`smoke`); a failed run shows
-  "✖ <reason>" just above the sidebar's host chip (e.g. "✖ Claude Code logged out") and a `self-test` problem in
+  "✖ <reason>" (`×` in the plain tier) just above the sidebar's host chip (e.g. "✖ Claude Code logged out") and a `self-test` problem in
   `force doctor`, until a run passes.
 - The claude flow first checks `claude auth status`: logged out, it records a "claude: logged in" failure and stops
   at once (no session is created).
@@ -842,6 +845,7 @@ The machine you sit at runs Force itself.
 | Part | |
 |---|---|
 | `force fonts [--cleanup-only \| --uninstall]` | `share/fonts.sh` (§45): installs the Nerd Font symbols and removes the old per-terminal profiles, launchers and clipboard kit |
+| on WSL | the terminal is a Windows program drawing with Windows' fonts, so no Linux font: `fonts.sh` (run by the installer too) copies `SymbolsNerdFontMono-Regular.ttf` into `%LOCALAPPDATA%\Microsoft\Windows\Fonts`, registers it under `HKCU\…\Fonts` (per user, no admin) and writes a Windows Terminal fragment (`Fragments\Force\force-<distro>.json`) adding a "Force (<distro>)" profile: font `Cascadia Mono, Symbols Nerd Font Mono`, command `wsl.exe -d <distro> --cd ~ -- bash -lc 'exec ~/.local/bin/force --glyphs rich'`. The user's own profiles are untouched; there Force shows the plain tier (§28). `--uninstall` removes the fragment, and the font with the last distro's profile. Without interop: a hint, exit 3 |
 | clipboard | the ui tmux (on the machine you sit at) pipes each copy to `share/clip-set.sh` through the `pane-set-clipboard` hook, which tmux runs for an application's OSC 52 (Claude Code's selection, passed up by the host tmux) and, with set-clipboard on, for copy-mode and mouse copies too. clip-set.sh: ≤ 4 MiB, needs `DISPLAY`/`WAYLAND_DISPLAY` (none, e.g. a ui over ssh: OSC 52 only), then `wl-copy`, `xclip`, `xsel`, else `share/clip-hold.py` (GTK 3 over X11/XWayland: owns CLIPBOARD and PRIMARY until another program takes them, 24 h at most, one holder at a time: `$XDG_RUNTIME_DIR/force-clip-hold.pid`, stop-previous + record under a flock). The daemon's clipboard step and `<state>/clip` are gone |
 | self-test | `force smoke` adds `split: keys reach a session through the ui` (a shell session, a ui session on a test ui socket, keys typed in the ui reach the host pane) and `split: force watch` (hello with this PROTO, then a snapshot with the session); both run without Claude or OpenCode |
 | doctor | per enabled remote: `remote-offline` (with the watcher's detail), `remote-version` (`force remote upgrade NAME`); an unreadable hosts.json is `remotes` |

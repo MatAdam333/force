@@ -262,7 +262,14 @@ def setup_services(rel, home, run, no_services, self_test, user) -> None:
 # --- step 7: the icon font on a desktop ------------------------------------------------------
 def setup_fonts(rel, env, run, wsl=None) -> None:
     if (is_wsl(env) if wsl is None else wsl):
-        say(WSL_ICONS_HINT)                                           # a Linux font would not reach the terminal
+        # the terminal is a Windows program: fonts.sh puts the symbols font into Windows and adds a "Force"
+        # profile to Windows Terminal (a Linux font would never reach it)
+        r = run(["bash", str(Path(rel) / "share" / "fonts.sh")], timeout=180)
+        if r.returncode == 0:
+            say(f'Windows Terminal: restart it once, then open "Force ({env.get("WSL_DISTRO_NAME") or "WSL"})" '
+                "from its new-tab menu for Force with icons")
+        else:
+            say(WSL_ICONS_HINT)
         return
     if not (env.get("DISPLAY") or env.get("WAYLAND_DISPLAY")):
         return                                                        # headless: nothing to do

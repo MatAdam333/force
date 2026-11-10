@@ -309,14 +309,22 @@ def test_fonts_skipped_when_family_present(tmp_path):
     assert not any(c[0][-1].endswith("fonts.sh") for c in fr.calls)
 
 
-def test_fonts_skipped_on_wsl_with_a_hint(tmp_path, capsys):
-    # WSLg gives a DISPLAY, but Windows Terminal draws with Windows fonts: a Linux font would never reach it
+def test_fonts_on_wsl_set_up_windows_terminal(tmp_path, capsys):
+    # WSL: no Linux font (WSLg's DISPLAY notwithstanding); fonts.sh sets up Windows and setup names the profile
     rel = make_release(tmp_path)
     fr = FakeRun()
-    fr.handle(lambda a, k: R(0, "DejaVu Sans\n") if a[0].endswith("fc-list") else None)
+    fr.handle(lambda a, k: R(0, "") if a[-1].endswith("fonts.sh") else None)
+    S.setup_fonts(rel, {"DISPLAY": ":0", "PATH": "/usr/bin:/bin", "WSL_DISTRO_NAME": "Ubuntu-24.04"}, fr, wsl=True)
+    assert [c[0][-1].endswith("fonts.sh") for c in fr.calls] == [True]      # no fc-list: Linux fonts don't matter
+    assert 'open "Force (Ubuntu-24.04)"' in capsys.readouterr().out
+
+
+def test_fonts_on_wsl_hint_when_windows_is_out_of_reach(tmp_path, capsys):
+    rel = make_release(tmp_path)
+    fr = FakeRun()
+    fr.handle(lambda a, k: R(3, "") if a[-1].endswith("fonts.sh") else None)
     S.setup_fonts(rel, {"DISPLAY": ":0", "PATH": "/usr/bin:/bin"}, fr, wsl=True)
-    assert not fr.calls
-    assert "Windows Terminal" in capsys.readouterr().out
+    assert "force settings set icons on" in capsys.readouterr().out
 
 
 # --- claude Code hint ------------------------------------------------------------------------

@@ -1160,7 +1160,7 @@ impl App {
         // the last `force smoke` failed (SPEC §37), with its reason: an agent CLI logged out, or changed in a way
         // Force mishandles
         if let Some(reason) = self.snapshot.as_ref().and_then(|s| s.smoke_failed.as_deref()) {
-            return Some(format!("✖ {reason}"));
+            return Some(format!("{} {reason}", crate::glyphs::state(self.tier, '×', '✖')));   // × where ✖ would be an emoji
         }
         // a newer Force release is available (SPEC §3): a footer note, lower priority than any error/smoke
         if let Some(v) = self.snapshot.as_ref().and_then(|s| s.update.as_deref()) {
@@ -3883,15 +3883,15 @@ mod tests {
         let g = a.build_grid_at(NOW);
         let h = a.h;
         let bottom = |g: &Grid| (h - 2..h).map(|y| row_text(g, y)).collect::<Vec<_>>().join("\n");
-        assert!(!bottom(&g).contains('✖'));
+        assert!(!bottom(&g).contains('×'));
         let mut snap = a.snapshot.clone().unwrap();
         snap.smoke_failed = Some("Claude Code logged out".into());
         a.update_from_snapshot(Some(snap.clone()), NOW);
         let g = a.build_grid_at(NOW);
-        assert!(bottom(&g).contains("✖ Claude Code logged out"), "{:?}", bottom(&g));
+        assert!(bottom(&g).contains("× Claude Code logged out"), "{:?}", bottom(&g));
         snap.smoke_failed = Some("self-test failed".into());
         a.update_from_snapshot(Some(snap), NOW);
         let g = a.build_grid_at(NOW);
-        assert!(bottom(&g).contains("✖ self-test failed"), "{:?}", bottom(&g));
+        assert!(bottom(&g).contains("× self-test failed"), "{:?}", bottom(&g));
     }
 }
