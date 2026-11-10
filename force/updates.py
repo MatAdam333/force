@@ -67,7 +67,9 @@ def fetch_install(base: str, timeout: int) -> tuple[bytes | None, str | None]:
     """Fetch `<base>/install.sh` (<= 1 MB) -> (content, error). `content` None on any failure."""
     url = base.rstrip("/") + "/install.sh"
     try:
-        with urllib.request.urlopen(url, timeout=timeout) as resp:
+        # Force names itself: a site's bot check may refuse Python's default user agent ("Python-urllib")
+        req = urllib.request.Request(url, headers={"User-Agent": f"force/{current_version() or 'dev'}"})
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
             data = resp.read(_MAX_BYTES + 1)
     except Exception as e:
         return None, str(e)

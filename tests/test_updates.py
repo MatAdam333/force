@@ -10,10 +10,12 @@ from force import updates
 
 # The handler reads a module-global body so each test can set what install.sh returns.
 _server_body = b""
+_server_agents: list[str] = []          # the User-Agent of every request, newest last
 
 
 class _Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
+        _server_agents.append(self.headers.get("User-Agent", ""))
         self.send_response(200)
         self.send_header("Content-Length", str(len(_server_body)))
         self.end_headers()
@@ -166,3 +168,12 @@ def test_snapshot_update_only_when_newer(fake_app, tmp_path):
     assert updates.snapshot_update(state) == "1.1.0"
     (state / "update.json").unlink()
     assert updates.snapshot_update(state) is None
+
+
+def test_fetch_names_force_as_the_user_agent(fake_app, http_server):
+    # Cloudflare's browser check refuses Python's default "Python-urllib/x.y" (error 1010): Force names itself
+    (fake_app / "VERSION").write_text("1.0.2\n")
+    set_body(b'VERSION="1.0.2"\n')
+    content, err = updates.fetch_install(http_server, 5)
+    assert err is None and content
+    assert _server_agents[-1] == "force/1.0.2"
