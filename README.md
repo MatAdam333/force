@@ -19,8 +19,8 @@
 <p align="center">
   <a href="https://useforce.cc">Website</a> ·
   <a href="https://useforce.cc/docs.html">Documentation</a> ·
-  <a href="https://github.com/zalandemeter/force/issues/new?template=bug_report.yml">Report an issue</a> ·
-  <a href="https://github.com/zalandemeter/force/issues/new?template=feature_request.yml">Suggest an idea</a>
+  <a href="https://github.com/zalandemeter/force/issues/new?template=bug_report.yml">Report&nbsp;an&nbsp;issue</a> ·
+  <a href="https://github.com/zalandemeter/force/issues/new?template=feature_request.yml">Suggest&nbsp;an&nbsp;idea</a>
 </p>
 
 <p align="center">
@@ -46,13 +46,11 @@ before unpacking. Today Force runs Claude Code, OpenCode and plain shell session
   Drop the connection or restart the machine: every session comes back with its conversation, and one that
   crashes restarts by itself.
 - **Every agent. Every machine.** Agents and plain shells in one list, with your Claude plan's five-hour and
-  weekly limits under it. `force host add` puts a server's sessions one click away from your laptop's.
+  weekly limits under it. <code>force&nbsp;host&nbsp;add</code> puts a server's sessions one click away from your laptop's.
 - **It names itself.** Start a session without a name and Force names it after your first message.
-- **Scripts and agents drive it.** `force prompt`, `wait` and `read` hand work to a session and collect the
-  answer. `force skill` is the guide an agent reads to run Force itself.
+- **Scripts and agents drive it.** <code>force&nbsp;prompt</code>, `wait` and `read` hand work to a session and collect the
+  answer. <code>force&nbsp;skill</code> is the guide an agent reads to run Force itself.
 - **Nothing to set up.** Force paints its own theme in any terminal or ssh login.
-
-<img src=".github/assets/phone.webp" alt="Force at phone width: the session list with one session needing permission" width="280" align="right">
 
 ### Your turn, on your phone too
 
@@ -65,21 +63,30 @@ force settings set notifyCommand 'curl -d "$FORCE_MESSAGE" ntfy.sh/my-force'
 
 Force fits a phone's terminal too: open it over ssh and the sidebar becomes the whole screen.
 
-<br clear="right">
+<p align="center">
+  <img src=".github/assets/phone.webp" alt="Force at phone width: the session list with one session needing permission" width="300">
+</p>
 
 ## The commands you will use
 
-| Command | What it does |
-|---|---|
-| `force` | Open the cockpit. |
-| `force new [NAME]` | Start a session in the current folder; without a name it is named after your first message. |
-| `force import` | List agent sessions Force doesn't manage yet; `force import ID` takes one over. |
-| `force host add NAME` | Add another machine you reach with ssh. |
-| `force prompt NAME TEXT --wait` | Send a session a prompt from a script or another agent and wait for its answer. |
-| `force settings` | Show and change settings, such as the command that notifies you. |
-| `force update` | Install the newest release. Sessions keep running. |
-| `force doctor --fix` | Check the setup and repair what it can. |
-| `force uninstall` | Remove Force; your conversations stay. |
+- <code>force</code>  
+  Open the cockpit.
+- <code>force&nbsp;new&nbsp;[NAME]</code>  
+  Start a session in the current folder; without a name it is named after your first message.
+- <code>force&nbsp;import</code>  
+  List agent sessions Force doesn't manage yet; <code>force&nbsp;import&nbsp;ID</code> takes one over.
+- <code>force&nbsp;host&nbsp;add&nbsp;NAME</code>  
+  Add another machine you reach with ssh.
+- <code>force&nbsp;prompt&nbsp;NAME&nbsp;TEXT&nbsp;--wait</code>  
+  Send a session a prompt from a script or another agent and wait for its answer.
+- <code>force&nbsp;settings</code>  
+  Show and change settings, such as the command that notifies you.
+- <code>force&nbsp;update</code>  
+  Install the newest release. Sessions keep running.
+- <code>force&nbsp;doctor&nbsp;--fix</code>  
+  Check the setup and repair what it can.
+- <code>force&nbsp;uninstall</code>  
+  Remove Force; your conversations stay.
 
 Everything else is in the menu (<kbd>Ctrl</kbd>+<kbd>Space</kbd> inside Force) and in the
 [documentation](https://useforce.cc/docs.html).
