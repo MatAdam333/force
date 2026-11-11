@@ -88,7 +88,7 @@ Force fits a phone's terminal too: open it over ssh and the sidebar becomes the 
 - <code>force&nbsp;uninstall</code>  
   Remove Force; your conversations stay.
 
-Everything else is in the menu (<kbd>Ctrl</kbd>+<kbd>Space</kbd> inside Force) and in the
+Everything else is in the menu (<kbd>Ctrl</kbd>&#8288;+&#8288;<kbd>Space</kbd> inside Force) and in the
 [documentation](https://useforce.cc/docs.html).
 
 ## Contributing
