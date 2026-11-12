@@ -63,6 +63,7 @@ class Paths:
 @dataclass(frozen=True)
 class Config:
     stale_hours: float = 12
+    unread_replies: bool = True    # a working session with a finding you have not seen shows a blue card (SPEC §5)
     upgrade_idle_minutes: float = 10
     auto_upgrade: bool = True
     sidebar_width: int = 29
@@ -130,6 +131,8 @@ SETTINGS = [
                "sidebar width in columns"),
     SettingSpec("staleAfterHours", "stale_hours", "number", (), True,
                "after how many idle hours an unseen session is stale"),
+    SettingSpec("unreadReplies", "unread_replies", "bool", (), True,
+               "turn a working session's card blue when it wrote you a finding you have not seen"),
     SettingSpec("autoUpgradeSessions", "auto_upgrade", "bool", (), True,
                "restart idle outdated agent sessions automatically"),
     SettingSpec("autoUpgradeIdleMinutes", "upgrade_idle_minutes", "number", (), True,
