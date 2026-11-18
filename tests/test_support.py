@@ -52,6 +52,14 @@ def test_feature_link_and_field_checks():
         support.issue_link("bug", "  ", {})
 
 
+def test_a_6_kb_link_is_shortened_to_what_github_opens():
+    # issue #54: a 6,033-character link got 400 Bad Request from GitHub in a signed-in browser
+    url, short = support.issue_link("bug", "test", {"what": "x " * 1450, "version": "force 1.7.1"})
+    assert len(url) <= support.URL_LIMIT <= 4000
+    assert short == ["what"] and _q(url)["version"] == "force 1.7.1"
+    assert _q(url)["what"].endswith("(shortened: paste the rest after opening)")
+
+
 def test_a_long_log_is_shortened_first_and_the_link_fits():
     url, short = support.issue_link("bug", "Daemon crash", {"what": "it crashed", "logs": "é" * 9000,
                                                           "doctor": "✓ healthy"})

@@ -43,7 +43,9 @@ GITHUB = "https://github.com"
 API = "https://api.github.com"
 NAME = "chuck"
 ROLE = "support"
-URL_LIMIT = 8000                # GitHub answers 414 above roughly 8 kB of URL
+# GitHub refuses a request whose link and headers together pass about 7 kB: a signed-in browser's cookies take
+# part of that (a 6 kB link got 400 Bad Request, a 2.4 kB one opened), so links stay at 4 kB
+URL_LIMIT = 4000
 TEMPLATES = {"bug": "bug_report.yml", "feature": "feature_request.yml"}
 # the form's text fields: GitHub fills these from the link's query (by field id). The bug form's `where` is a
 # dropdown, which GitHub does not document as fillable: it stays out of the link and the user picks it.
