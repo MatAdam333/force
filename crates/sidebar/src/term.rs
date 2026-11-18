@@ -66,7 +66,7 @@ unsafe extern "C" fn handle_sigusr1(_: i32) {
     sig_write(1);
 }
 
-/// The sidebar's and header's ratatui backend: crossterm's, except that a frame whose first cell is not plain
+/// The sidebar's and header's ratatui backend (SPEC §28): crossterm's, except that a frame whose first cell is not plain
 /// ASCII (a spinner glyph, an icon) first writes a space there. tmux 3.4 resets its terminal state, mouse
 /// modes included, after a lone non-ASCII cell that a pane other than the active one writes first in a batch
 /// (`tty_cmd_cell` with `num == 1`): VTE terminals then flicker the pointer with every spinner frame. A plain
